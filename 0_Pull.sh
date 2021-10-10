@@ -8,10 +8,30 @@ if [ ! -d "$pathToDir/Redis" ]; then
 	cd Dependencies/_Downloads
 	wget https://download.redis.io/releases/redis-6.2.6.tar.gz
 	tar xzf redis-6.2.6.tar.gz --directory ../Redis --strip-components=1
-	cd ../Redis
-	make
+	cd ../..
 else
 	echo "Redis already exists"
 fi
 	
+redisClient1="StackExchange.Redis"
+if [ ! -d "$pathToDir/$redisClient1" ]; then
+	mkdir -p Dependencies/$redisClient1
+	cd Dependencies/$redisClient1
+	git clone https://github.com/StackExchange/StackExchange.Redis.git
+	cd ../..
+else
+	echo "$redisClient1 already exists"
+fi
 
+redisClient2="ServiceStack.Redis"
+if [ ! -d "$pathToDir/$redisClient2" ]; then
+	mkdir -p Dependencies/$redisClient2
+	cd Dependencies/$redisClient2
+	git clone https://github.com/ServiceStack/ServiceStack.Redis.git
+	cd ../..
+else
+	echo "$redisClient2 already exists"
+fi
+
+
+rm -rf Dependencies/_Downloads
