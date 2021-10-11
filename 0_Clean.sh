@@ -14,11 +14,11 @@ else
 fi
 	
 redisClient1="ServiceStack.Redis"
-if [ ! -d "$pathToDir/$redisClient1" ]; then
-	mkdir -p Dependencies
-	cd Dependencies
+if [ ! -d "$pathToDir/$redisClien12" ]; then
+	mkdir -p Dependencies/$redisClien12
+	cd Dependencies/$redisClien12
 	git clone https://github.com/ServiceStack/ServiceStack.Redis.git
-	cd ..
+	cd ../..
 else
 	echo "$redisClient1 already exists"
 fi

@@ -12,7 +12,7 @@ if not exist "Dependencies\Redis" (
 )
 	
 if not exist "Dependencies\ServiceStack.Redis" (
-	mkdir Dependencies
+	mkdir Dependencies\ServiceStack.Redis
 	cd Dependencies
 	git clone https://github.com/ServiceStack/ServiceStack.Redis.git
 	cd ..
