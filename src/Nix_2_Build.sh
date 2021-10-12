@@ -1,21 +1,24 @@
 #!/bin/bash
 
+
 if [ -d "Dependencies/Redis" ]; then
 	cd Dependencies/Redis
-	make
+	echo Building Redis...
+	make > /dev/null
 	cd ../..
 else
 	echo "Redis doesn't exist!"
 fi
 
 if [ -d "Dependencies/protobuf/src" ]; then
-	cd Dependencies/protobuf/src
+	cd Dependencies/protobuf
+	echo Building Protobuf..
 	./configure
     make
     make check
     sudo make install
-    sudo ldconfig # refresh shared library cache.
-	cd ../../..
+    sudo ldconfig
+	cd ../..
 else
 	echo "Redis doesn't exist!"
 fi

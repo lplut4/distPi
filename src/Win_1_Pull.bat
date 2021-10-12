@@ -17,8 +17,8 @@ if not exist "Dependencies\Redis" (
 	mkdir Dependencies\Redis || set error=1
 	mkdir Dependencies\_Downloads || set error=1
 	cd Dependencies\_Downloads || set error=1
-	curl --output redis.tar.gz --url https://download.redis.io/releases/redis-6.2.6.tar.gz || set error=1
-	tar xzf redis.tar.gz --directory ..\Redis --strip-components=1 || set error=1
+	curl --output redis.tar.gz --url https://download.redis.io/releases/redis-6.2.6.tar.gz >NUL || set error=1
+	tar xzf redis.tar.gz --directory ..\Redis --strip-components=1 >NUL || set error=1
 	cd ..\..
 ) else (
 	echo Redis already exists
@@ -29,7 +29,7 @@ echo # Pulling ServiceStack.Redis #
 echo ##############################	
 if not exist "Dependencies\ServiceStack.Redis" (
 	cd Dependencies || set error=1
-	git clone https://github.com/ServiceStack/ServiceStack.Redis.git || set error=1
+	git clone https://github.com/ServiceStack/ServiceStack.Redis.git >NUL || set error=1
 	cd ..
 ) else (
 	echo ServiceStack.Redis already exists
@@ -40,7 +40,7 @@ echo # Pulling Protobuf #
 echo ####################
 if not exist "Dependencies\Protobuf" (
 	cd Dependencies || set error=1
-	git clone https://github.com/protocolbuffers/protobuf.git || set error=1
+	git clone https://github.com/protocolbuffers/protobuf.git >NUL || set error=1
 	cd ..
 ) else (
 	echo Protobuf already exists
