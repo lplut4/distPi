@@ -4,7 +4,7 @@
 if [ -d "Dependencies/Redis" ]; then
 	cd Dependencies/Redis
 	echo Building Redis...
-	make > /dev/null
+	make
 	cd ../..
 else
 	echo "Redis doesn't exist!"
