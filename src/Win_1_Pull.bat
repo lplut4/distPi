@@ -41,7 +41,9 @@ echo ####################
 if not exist "Dependencies\Protobuf" (
 	cd Dependencies || set error=1
 	git clone https://github.com/protocolbuffers/protobuf.git || set error=1
-	cd ..
+	cd protobuf
+	git submodule update --init --recursive
+	cd ..\..
 ) else (
 	echo Protobuf already exists
 )
