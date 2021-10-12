@@ -23,5 +23,15 @@ else
 	echo "$redisClient1 already exists"
 fi
 
+protobuf="Protobuf"
+if [ ! -d "$pathToDir/$protobuf" ]; then
+	mkdir -p Dependencies
+	cd Dependencies
+	git clone https://github.com/protocolbuffers/protobuf.git
+	cd ..
+else
+	echo "$protobuf already exists"
+fi
+
 
 rm -rf Dependencies/_Downloads
