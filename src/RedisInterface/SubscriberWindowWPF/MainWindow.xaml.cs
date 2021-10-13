@@ -9,11 +9,15 @@ using ServiceStack.Redis;
 namespace SubscriberWindowWPF
 {
     public partial class MainWindow : Window
-    { 
+    {
+
+        RedisClient publisher;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            publisher = new RedisClient("raspberrypi");
 
             var args = Environment.GetCommandLineArgs();
 
@@ -30,6 +34,9 @@ namespace SubscriberWindowWPF
             else
             {
                 channelsToSubscribe.Add("channel-1");
+                channelsToSubscribe.Add("channel-2");
+                channelsToSubscribe.Add("channel-3");
+                channelsToSubscribe.Add("channel-4");
             }
 
             {
@@ -76,6 +83,17 @@ namespace SubscriberWindowWPF
                 var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
                 m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = channel, Data = msg });
             }));
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            publisher.PublishMessage("channel-1", "pushed button 1");
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            publisher.PublishMessage("channel-2", "pushed button 2");
+
         }
     }
 }
