@@ -11,6 +11,32 @@ set rootDir=%cd%
 set msbuild="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
 set error=0
 
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
+
+echo ####################
+echo # Building hiredis #
+echo ####################
+cd %rootDir%\Dependencies\hiredis
+mkdir build
+cd build
+echo Running CMake...
+cmake .. || set error=1
+echo Building hiredis...
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 hiredis.sln || set error=1
+
+echo ############################
+echo # Building redis-plus-plus #
+echo ############################
+cd %rootDir%\Dependencies\redis-plus-plus
+mkdir build
+cd build
+echo Running CMake...
+set libDir=%rootDir%\Dependencies\hiredis\build\Release
+set cmakeArgs=-DHIREDIS_HEADER=%rootDir%\Dependencies  -DHIREDIS_LIB=%libDir%\hiredis.lib -DCMAKE_PREFIX_PATH=%rootDir%\Dependencies\hiredis\build\Release -DREDIS_PLUS_PLUS_CXX_STANDARD=17
+cmake %cmakeArgs% .. || set error=1
+echo Building hiredis...
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 redis++.sln || set error=1
+
 echo ###############################
 echo # Building ServiceStack.Redis #
 echo ###############################
