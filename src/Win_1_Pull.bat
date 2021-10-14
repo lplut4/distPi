@@ -24,6 +24,28 @@ if not exist "Dependencies\Redis" (
 	echo Redis already exists
 )
 
+echo ###################
+echo # Pulling hiredis #
+echo ###################
+if not exist "Dependencies\hiredis" (
+	cd Dependencies || set error=1
+	git clone https://github.com/redis/hiredis.git || set error=1
+	cd ..
+) else (
+	echo hiredis already exists
+)
+
+echo ###########################
+echo # Pulling redis-plus-plus #
+echo ############################
+if not exist "Dependencies\redis-plus-plus" (
+	cd Dependencies || set error=1
+	git clone https://github.com/sewenew/redis-plus-plus.git || set error=1
+	cd ..
+) else (
+	echo redis-plus-plus already exists
+)
+
 echo ##############################
 echo # Pulling ServiceStack.Redis #
 echo ##############################	

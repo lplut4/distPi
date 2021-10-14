@@ -1,8 +1,6 @@
 #!/bin/bash
 
-pathToDir="Dependencies"
-
-if [ ! -d "$pathToDir/Redis" ]; then
+if [ ! -d "Dependencies/Redis" ]; then
 	echo Pulling Redis...
 	mkdir -p Dependencies/_Downloads
 	mkdir -p Dependencies/Redis
@@ -14,20 +12,38 @@ else
 	echo "Redis already exists"
 fi
 	
-redisClient1="ServiceStack.Redis"
-if [ ! -d "$pathToDir/$redisClient1" ]; then
-	echo Pulling $redisClient1...
+if [ ! -d "Dependencies/hiredis" ]; then
+	echo Pulling hiredis...
+	mkdir -p Dependencies
+	cd Dependencies
+	git clone https://github.com/redis/hiredis.git
+	cd ..
+else
+	echo "redis-plus-plus already exists"
+fi
+	
+if [ ! -d "Dependencies/redis-plus-plus" ]; then
+	echo Pulling redis-plus-plus...
+	mkdir -p Dependencies
+	cd Dependencies
+	git clone https://github.com/sewenew/redis-plus-plus.git
+	cd ..
+else
+	echo "redis-plus-plus already exists"
+fi
+	
+if [ ! -d "Dependencies/ServiceStack.Redis" ]; then
+	echo Pulling ServiceStack.Redis...
 	mkdir -p Dependencies
 	cd Dependencies
 	git clone https://github.com/ServiceStack/ServiceStack.Redis.git
 	cd ..
 else
-	echo "$redisClient1 already exists"
+	echo "ServiceStack.Redis already exists"
 fi
 
-protobuf="Protobuf"
-if [ ! -d "$pathToDir/$protobuf" ]; then
-	echo Pulling $protobuf...
+if [ ! -d "Dependencies/protobuf" ]; then
+	echo Pulling protobuf...
 	mkdir -p Dependencies
 	cd Dependencies
 	git clone https://github.com/protocolbuffers/protobuf.git
@@ -36,7 +52,7 @@ if [ ! -d "$pathToDir/$protobuf" ]; then
     ./autogen.sh > /dev/null
 	cd ../..
 else
-	echo "$protobuf already exists"
+	echo "protobuf already exists"
 fi
 
 
