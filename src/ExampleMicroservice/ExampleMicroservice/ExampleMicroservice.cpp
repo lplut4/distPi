@@ -26,7 +26,7 @@ int main()
             auto redis = sw::redis::Redis::Redis("tcp://raspberrypi:6379");
             auto sub = redis.subscriber();
 
-            std::cout << "Connected!" << std::endl;
+            std::cout << std::endl << "Connected!" << std::endl;
 
             sub.on_message([](std::string channel, std::string msg ) 
                 {
@@ -40,7 +40,7 @@ int main()
                 });
 
             sub.subscribe({ "channel-1", "channel-2", "channel-3" });
-            sub.psubscribe("pattern1*");
+            sub.psubscribe( "pattern1*" );
 
             while (true) 
             {
@@ -56,7 +56,7 @@ int main()
         }
         catch (...) 
         {
-            std::cout << "No response..." << std::endl;
+            std::cout << ".";
         }
     }
 }
