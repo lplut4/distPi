@@ -1,6 +1,6 @@
-#include <algorithm>
+//#include <algorithm>
 #include <iostream>
-#include <initializer_list>
+//#include <initializer_list>
 #include <sw/redis++/redis++.h>
 
 std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
@@ -46,7 +46,7 @@ int main()
 
             sub.on_meta([]( sw::redis::Subscriber::MsgType type, sw::redis::OptionalString channel, long long num ) 
                 {
-                    std::cout << "Received " << msgTypeToString( type ) << " on " << channel.value_or( "<NO CHANNEL>" ) << " number " << num << std::endl;
+                    std::cout << "Received " << msgTypeToString( type ) << " on " << channel.value() << " number " << num << std::endl;
                 });
 
             sub.subscribe( channelSubscriptions.begin(), channelSubscriptions.end() );

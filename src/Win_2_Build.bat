@@ -32,7 +32,7 @@ mkdir build
 cd build
 echo Running CMake...
 set libDir=%rootDir%\Dependencies\hiredis\build\Release
-set cmakeArgs=-DHIREDIS_HEADER=%rootDir%\Dependencies  -DHIREDIS_LIB=%libDir%\hiredis.lib -DCMAKE_PREFIX_PATH=%rootDir%\Dependencies\hiredis\build\Release -DREDIS_PLUS_PLUS_CXX_STANDARD=17
+set cmakeArgs=-DHIREDIS_HEADER=%rootDir%\Dependencies  -DHIREDIS_LIB=%libDir%\hiredis.lib -DCMAKE_PREFIX_PATH=%rootDir%\Dependencies\hiredis\build\Release -DREDIS_PLUS_PLUS_CXX_STANDARD=11
 cmake %cmakeArgs% .. || set error=1
 echo Building hiredis...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 redis++.sln || set error=1
