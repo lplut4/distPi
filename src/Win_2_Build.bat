@@ -61,6 +61,12 @@ echo ###########################
 cd %rootDir%\RedisInterface
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo RedisInterface.sln || set error=1
 
+echo ################################
+echo # Building ExampleMicroservice #
+echo ################################
+cd %rootDir%\ExampleMicroservice
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo ExampleMicroservice.sln || set error=1
+
 if "%error%" == "1" ( 
 	echo # ERRORS OCCURRED
 ) else (
