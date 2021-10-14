@@ -55,14 +55,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Dependencies;..\Dependencies\redis-plus-plus\src;..\Dependencies\redis-plus-plus\src\sw\redis++\cxx17;C:\Users\admin\Desktop\Repos\distPi\src\Dependencies\redis-plus-plus\src\sw\redis++\no_tls</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Dependencies;..\Dependencies\redis-plus-plus\src;..\Dependencies\redis-plus-plus\src\sw\redis++\cxx17;..\Dependencies\redis-plus-plus\src\sw\redis++\no_tls</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\admin\Desktop\Repos\distPi\src\Dependencies\redis-plus-plus\build\Release;C:\Users\admin\Desktop\Repos\distPi\src\Dependencies\hiredis\build\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Dependencies\redis-plus-plus\build\Release;..\Dependencies\hiredis\build\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>Ws2_32.lib;wsock32.lib;hiredis_static.lib;redis++_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -74,7 +74,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Dependencies;..\Dependencies\redis-plus-plus\src;..\Dependencies\redis-plus-plus\src\sw\redis++\cxx17;C:\Users\admin\Desktop\Repos\distPi\src\Dependencies\redis-plus-plus\src\sw\redis++\no_tls</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Dependencies;..\Dependencies\redis-plus-plus\src;..\Dependencies\redis-plus-plus\src\sw\redis++\cxx17;..\Dependencies\redis-plus-plus\src\sw\redis++\no_tls</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -83,7 +83,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\admin\Desktop\Repos\distPi\src\Dependencies\redis-plus-plus\build\Release;C:\Users\admin\Desktop\Repos\distPi\src\Dependencies\hiredis\build\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Dependencies\redis-plus-plus\build\Release;..\Dependencies\hiredis\build\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>Ws2_32.lib;wsock32.lib;hiredis_static.lib;redis++_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
