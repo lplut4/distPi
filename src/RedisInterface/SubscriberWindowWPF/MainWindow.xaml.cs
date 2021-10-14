@@ -11,13 +11,13 @@ namespace SubscriberWindowWPF
     public partial class MainWindow : Window
     {
 
-        RedisClient publisher;
+        RedisClient m_publisher;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            publisher = new RedisClient("raspberrypi");
+            m_publisher = new RedisClient("raspberrypi");
 
             var args = Environment.GetCommandLineArgs();
 
@@ -87,13 +87,22 @@ namespace SubscriberWindowWPF
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            publisher.PublishMessage("channel-1", "pushed button 1");
+            m_publisher.PublishMessage("channel-1", "pushed button 1");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            publisher.PublishMessage("channel-2", "pushed button 2");
+            m_publisher.PublishMessage("channel-2", "pushed button 2");
 
+        }
+
+        private void m_dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Example of inspecting the selected cell of the data column
+            DataGrid dataGrid = sender as DataGrid;
+            DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(dataGrid.SelectedIndex);
+            DataGridCell RowColumn = dataGrid.Columns[2].GetCellContent(row).Parent as DataGridCell;
+            string CellValue = ((TextBlock)RowColumn.Content).Text;
         }
     }
 }
