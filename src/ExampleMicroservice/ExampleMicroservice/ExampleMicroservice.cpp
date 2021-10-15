@@ -1,7 +1,10 @@
-//#include <algorithm>
+
+#include "Libs.h"
+
 #include <iostream>
-//#include <initializer_list>
 #include <sw/redis++/redis++.h>
+
+#include "uuid.h"
 
 std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
 {
@@ -16,12 +19,15 @@ std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
 
 int main()
 {
-    std::cout << "Running Example Microservice" << std::endl;
+    std::string uuid = newUUID();
+
+    std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
 
     auto redisHost = "";
     std::vector<std::string> channelSubscriptions;
 
     redisHost = "tcp://raspberrypi:6379";
+    channelSubscriptions.push_back( "Node Info" );
     channelSubscriptions.push_back( "channel-1" );
     channelSubscriptions.push_back( "channel-2" );
     channelSubscriptions.push_back( "channel-3" );
@@ -53,7 +59,7 @@ int main()
 
             connectedOnce = true;
 
-            redis.publish("channel-1", "New service is up");
+            redis.publish("Node Info", "New ExampleMicroservice is up: " + uuid);
 
             while ( true ) 
             {

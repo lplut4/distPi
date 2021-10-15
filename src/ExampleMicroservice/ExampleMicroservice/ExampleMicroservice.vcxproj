@@ -63,7 +63,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\Dependencies\redis-plus-plus\build\Release;..\..\Dependencies\hiredis\build\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Ws2_32.lib;wsock32.lib;hiredis_static.lib;redis++_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -84,11 +85,16 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\Dependencies\redis-plus-plus\build\Release;..\..\Dependencies\hiredis\build\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Ws2_32.lib;wsock32.lib;hiredis_static.lib;redis++_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ExampleMicroservice.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Libs.h" />
+    <ClInclude Include="uuid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
