@@ -86,10 +86,6 @@ if not exist "Dependencies\protocWin" (
 
 if exist Dependencies\_Downloads ( rmdir /S /Q Dependencies\_Downloads )
 
-if "%error%" == "1" ( 
-	echo # ERRORS OCCURRED
-) else (
-	echo # SUCCESS!
-)
+if "%error%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
 
 pause

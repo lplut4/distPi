@@ -55,6 +55,12 @@ echo Nuget Package Restore...
 echo Build Release...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 Google.Protobuf.sln || set error=1
 
+echo ###############################
+echo # Building Protobuf DataModel #
+echo ###############################
+cd %rootDir%\DataModel
+call Win_Build.bat || set error=1
+
 echo ###########################
 echo # Building RedisInterface #
 echo ###########################
@@ -67,10 +73,6 @@ echo ################################
 cd %rootDir%\ExampleMicroservice
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo ExampleMicroservice.sln || set error=1
 
-if "%error%" == "1" ( 
-	echo # ERRORS OCCURRED
-) else (
-	echo # SUCCESS!
-)
+if "%error%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
 
 pause

@@ -12,11 +12,6 @@ if exist "Dependencies" (
 	
 git clean -fxd || set error=1
 
-
-if "%error%" == "1" ( 
-	echo # ERRORS OCCURRED
-) else (
-	echo # SUCCESS!
-)
+if "%error%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
 
 pause
