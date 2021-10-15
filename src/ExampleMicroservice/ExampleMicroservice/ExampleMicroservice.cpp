@@ -53,6 +53,8 @@ int main()
 
             connectedOnce = true;
 
+            redis.publish("channel-1", "New service is up");
+
             while ( true ) 
             {
                 try 
