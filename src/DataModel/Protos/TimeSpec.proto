@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package DataModel;
+
+message TimeSpec
+{
+	optional uint64 tv_sec  = 1;
+	optional uint32 tv_nsec = 2;
+}

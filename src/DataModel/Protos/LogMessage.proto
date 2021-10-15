@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package DataModel;
+
+import "TimeSpec.proto";
+
+message LogMessage 
+{
+	enum Category 
+	{
+		DEBUG   = 0;
+		INFO    = 1;
+		WARNING = 2;
+		ERROR   = 3;
+	}
+
+	optional TimeSpec timeOfLog = 1;
+	optional Category category  = 2;
+	optional string   message   = 3;
+}
