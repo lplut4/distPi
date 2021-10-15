@@ -20,26 +20,19 @@ namespace SubscriberWindowWPF
             m_dataGrid   = dataGrid;
         }
 
-        public void start()
+        public void start( List<Type> dataToSubscribeTo )
         {
-            var args = Environment.GetCommandLineArgs();
-
-            var redisHost = "raspberrypi";
             var channelsToSubscribe = new List<string>();
-            if (args.Length > 2)
+
+            channelsToSubscribe.Add("Node Info");
+            channelsToSubscribe.Add("channel-1");
+            channelsToSubscribe.Add("channel-2");
+            channelsToSubscribe.Add("channel-3");
+            channelsToSubscribe.Add("channel-4");
+
+            foreach ( var data in dataToSubscribeTo )
             {
-                redisHost = args[0];
-                for (int i = 1; i < args.Length; i++)
-                {
-                    channelsToSubscribe.Add(args[i]);
-                }
-            }
-            else
-            {
-                channelsToSubscribe.Add("channel-1");
-                channelsToSubscribe.Add("channel-2");
-                channelsToSubscribe.Add("channel-3");
-                channelsToSubscribe.Add("channel-4");
+                channelsToSubscribe.Add(data.FullName);
             }
 
             {

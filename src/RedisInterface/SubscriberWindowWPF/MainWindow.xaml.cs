@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using DataModel;
 using ServiceStack.Redis;
 
 namespace SubscriberWindowWPF
@@ -14,9 +15,20 @@ namespace SubscriberWindowWPF
             InitializeComponent();
 
             m_redisClient = new RedisClient("raspberrypi");
-            m_redisGridAdapter = new RedisDataGridAdapter(this, "raspberrypi", m_dataGrid);
 
-            m_redisGridAdapter.start();
+            var dataModelLibrary = ReflectiveDataModelCollection.getSerializableTypes();
+
+            m_redisGridAdapter = new RedisDataGridAdapter(this, "raspberrypi", m_dataGrid);
+            m_redisGridAdapter.start( dataModelLibrary );
+
+            // EXAMPLE CODE - remove and put this in the correct place
+            var time = new TimeSpec();
+            time.TvNsec = 1;
+            time.TvSec = 1000;
+
+            byte[] buffer = ReflectiveDataModelCollection.serialize(time);
+
+            var newTime = ReflectiveDataModelCollection.deserialize(time.GetType(), buffer);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
