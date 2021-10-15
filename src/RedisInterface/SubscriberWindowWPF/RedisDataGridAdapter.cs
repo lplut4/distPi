@@ -4,6 +4,7 @@ using ServiceStack.Redis;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Threading;
+using DataModel;
 
 namespace SubscriberWindowWPF
 {
@@ -60,9 +61,9 @@ namespace SubscriberWindowWPF
             new Thread(() =>
             {
                 var clientsManager = new PooledRedisClientManager(m_redisHost);
-                var redisPubSub = new RedisPubSubServer( clientsManager, channelsToSubscribe.ToArray() )
+                var redisPubSub = new RedisPubSubServer(clientsManager, channelsToSubscribe.ToArray())
                 {
-                    OnMessage = (channel, msg) => recordMessage(msg, channel)
+                    OnMessageBytes = (channel, bytes) => recordByteMessage(bytes, channel)
                 }
                 .Start();
                 m_mainWindow.Dispatcher.Invoke((Action)(() =>
@@ -70,6 +71,34 @@ namespace SubscriberWindowWPF
                     m_dataGrid.Items.Clear();
                 }));
             }).Start();
+        }
+
+        private void recordByteMessage(byte[] buffer, string channel)
+        {
+            m_mainWindow.Dispatcher.Invoke((Action)(() =>
+            {
+                var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
+
+                var dataType = ReflectiveDataModelCollection.GetSerializableType(channel);
+
+                if (dataType == null)
+                {
+                    var str = System.Text.Encoding.Default.GetString(buffer);
+                    recordMessage(str, channel);
+                    return;
+                }
+
+                try
+                {
+                    var data = ReflectiveDataModelCollection.Deserialize(dataType, buffer);
+                    var decodedData = ReflectiveDataModelCollection.DecodeMessage(data);
+                    m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = channel, Data = decodedData });
+                }
+                catch (Google.Protobuf.InvalidProtocolBufferException)
+                {
+                    // Control message?  Should we ignore it?
+                }
+            }));
         }
 
         private void recordMessage(string msg, string channel)
@@ -80,6 +109,5 @@ namespace SubscriberWindowWPF
                 m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = channel, Data = msg });
             }));
         }
-
     }
 }

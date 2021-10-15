@@ -12,23 +12,13 @@ namespace SubscriberWindowWPF
 
         public MainWindow()
         {
-            InitializeComponent();
-
             m_redisClient = new RedisClient("raspberrypi");
+            var dataModelLibrary = ReflectiveDataModelCollection.GetSerializableTypes();
 
-            var dataModelLibrary = ReflectiveDataModelCollection.getSerializableTypes();
+            InitializeComponent();
 
             m_redisGridAdapter = new RedisDataGridAdapter(this, "raspberrypi", m_dataGrid);
             m_redisGridAdapter.start( dataModelLibrary );
-
-            // EXAMPLE CODE - remove and put this in the correct place
-            var time = new TimeSpec();
-            time.TvNsec = 1;
-            time.TvSec = 1000;
-
-            byte[] buffer = ReflectiveDataModelCollection.serialize(time);
-
-            var newTime = ReflectiveDataModelCollection.deserialize(time.GetType(), buffer);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -38,7 +28,12 @@ namespace SubscriberWindowWPF
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            m_redisClient.PublishMessage("channel-2", "pushed button 2");
+            var time = new TimeSpec();
+            time.TvNsec = 1;
+            time.TvSec = 1000;
+            byte[] buffer = ReflectiveDataModelCollection.Serialize(time);
+
+            m_redisClient.Publish(time.GetType().FullName, buffer);
         }
 
         private void m_dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
