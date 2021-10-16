@@ -5,6 +5,10 @@
 #include <sw/redis++/redis++.h>
 
 #include "uuid.h"
+//#include "TimeSpec.ph.h"
+//#include "LogMessage.ph.h"
+//#include "../../DataModel/out/cpp/TimeSpec.pb.h"
+
 
 std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
 {

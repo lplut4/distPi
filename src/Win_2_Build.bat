@@ -46,6 +46,18 @@ echo Nuget Package Restore...
 echo Build Release...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 ServiceStack.Redis.sln || set error=1
 
+echo #####################
+echo # Building protobuf #
+echo #####################
+cd %rootDir%\Dependencies\protobuf\cmake\
+mkdir build
+cd build
+echo Running CMake...
+set cmakeArgs=-G "Visual Studio 16 2019" -DCMAKE_INSTALL_PREFIX=install
+cmake %cmakeArgs% .. || set error=1
+echo Building protobuf...
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 protobuf.sln || set error=1
+
 echo ################################
 echo # Building C# Protobuf Runtime #
 echo ################################
