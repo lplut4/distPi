@@ -25,5 +25,3 @@ set protocOptions=--cpp_out=..\out\cpp --csharp_out=..\out\csharp --python_out=.
 cd ..
 
 if "%error%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
-
-pause

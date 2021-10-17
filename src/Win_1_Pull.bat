@@ -47,14 +47,14 @@ if not exist "Dependencies\redis-plus-plus" (
 )
 
 echo ##############################
-echo # Pulling ServiceStack.Redis #
+echo # Pulling StackExchange.Redis #
 echo ##############################	
-if not exist "Dependencies\ServiceStack.Redis" (
+if not exist "Dependencies\StackExchange.Redis" (
 	cd Dependencies || set error=1
-	git clone https://github.com/ServiceStack/ServiceStack.Redis.git || set error=1
+	git clone https://github.com/StackExchange/StackExchange.Redis.git || set error=1
 	cd ..
 ) else (
-	echo ServiceStack.Redis already exists
+	echo StackExchange.Redis already exists
 )
 
 echo ####################

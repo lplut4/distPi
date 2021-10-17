@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ServiceStack.Redis;
+using StackExchange.Redis;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Threading;
@@ -10,15 +10,15 @@ namespace SubscriberWindowWPF
 {
     class RedisDataGridAdapter
     { 
-        private          MainWindow m_mainWindow;
-        private readonly string     m_redisHost;
-        private          DataGrid   m_dataGrid;
+        private MainWindow            m_mainWindow;
+        private ConnectionMultiplexer m_redisClient;
+        private DataGrid              m_dataGrid;
 
-        public RedisDataGridAdapter( MainWindow mainWindow, string redisHost, DataGrid dataGrid )
+        public RedisDataGridAdapter( MainWindow mainWindow, ConnectionMultiplexer redisClient, DataGrid dataGrid )
         {
-            m_mainWindow = mainWindow;
-            m_redisHost  = redisHost;
-            m_dataGrid   = dataGrid;
+            m_mainWindow  = mainWindow;
+            m_redisClient = redisClient;
+            m_dataGrid    = dataGrid;
         }
 
         public void start( List<Type> dataToSubscribeTo )
@@ -56,16 +56,17 @@ namespace SubscriberWindowWPF
             }
 
             var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
-            m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = "Connecting to ", Data = m_redisHost });
+            m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = "Connecting to ", Data = m_redisClient.ClientName });
 
             new Thread(() =>
             {
-                var clientsManager = new PooledRedisClientManager(m_redisHost);
-                var redisPubSub = new RedisPubSubServer(clientsManager, channelsToSubscribe.ToArray())
+                foreach ( var channel in channelsToSubscribe )
                 {
-                    OnMessageBytes = (channel, bytes) => recordByteMessage(bytes, channel)
+                    var sub = m_redisClient.GetSubscriber();
+                    sub.Subscribe(channel).OnMessage( channelMessage => { 
+                        recordByteMessage(channelMessage.Message, channel);
+                    });
                 }
-                .Start();
                 m_mainWindow.Dispatcher.Invoke((Action)(() =>
                 {
                     m_dataGrid.Items.Clear();

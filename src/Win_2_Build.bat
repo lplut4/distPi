@@ -38,13 +38,13 @@ echo Building hiredis...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 redis++.sln || set error=1
 
 echo ###############################
-echo # Building ServiceStack.Redis #
+echo # Building StackExchange.Redis #
 echo ###############################
-cd %rootDir%\Dependencies\ServiceStack.Redis\src
+cd %rootDir%\Dependencies\StackExchange.Redis\
 echo Nuget Package Restore...
-%msbuild% /m /t:restore /verbosity:quiet /noLogo ServiceStack.Redis.sln || set error=1
+%msbuild% /m /t:restore /verbosity:quiet /noLogo StackExchange.Redis.sln || set error=1
 echo Build Release...
-%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 ServiceStack.Redis.sln || set error=1
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 StackExchange.Redis.sln || set error=1
 
 echo #####################
 echo # Building protobuf #

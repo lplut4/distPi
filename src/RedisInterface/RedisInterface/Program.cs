@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using ServiceStack.Redis;
+using StackExchange.Redis;
 
 namespace RedisInterface
 {
@@ -11,23 +8,25 @@ namespace RedisInterface
     {
         static void Main(string[] args)
         {
-            //RedisClient client = new RedisClient("raspberrypi");
-            //var ping = client.Ping();
-
-            //var added = client.Add("key123", 123);
-
-            //var value = client.Get<int>("key123");
-
-            var clientsManager = new PooledRedisClientManager("raspberrypi");
-            var redisPubSub = new RedisPubSubServer(clientsManager, "channel-1")
-            {
-                OnMessage = (channel, msg) => Console.WriteLine("Received " + msg + " on channel " + channel)
-            }
-            .Start();
-
             Console.WriteLine("Subscribing...");
 
+            var redis = ConnectionMultiplexer.Connect("localhost");
+            var sub = redis.GetSubscriber();
+
+            // Synchronous handler
+            sub.Subscribe("channel-1").OnMessage(channelMessage => {
+                Console.WriteLine((string)channelMessage.Message);
+            });
+
+            // Asynchronous handler
+            sub.Subscribe("channel-1").OnMessage(async channelMessage => {
+                await Task.Delay(1000);
+                Console.WriteLine((string)channelMessage.Message);
+            });
+
+            sub.Publish("channel-1", "RedisInterface Publishing Message");
             while (true) ;
         }
     }
 }
+ 

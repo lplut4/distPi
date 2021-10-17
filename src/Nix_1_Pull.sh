@@ -19,7 +19,7 @@ if [ ! -d "Dependencies/hiredis" ]; then
 	git clone https://github.com/redis/hiredis.git
 	cd ..
 else
-	echo "redis-plus-plus already exists"
+	echo "hiredis already exists"
 fi
 	
 if [ ! -d "Dependencies/redis-plus-plus" ]; then
@@ -30,16 +30,6 @@ if [ ! -d "Dependencies/redis-plus-plus" ]; then
 	cd ..
 else
 	echo "redis-plus-plus already exists"
-fi
-	
-if [ ! -d "Dependencies/ServiceStack.Redis" ]; then
-	echo Pulling ServiceStack.Redis...
-	mkdir -p Dependencies
-	cd Dependencies
-	git clone https://github.com/ServiceStack/ServiceStack.Redis.git
-	cd ..
-else
-	echo "ServiceStack.Redis already exists"
 fi
 
 if [ ! -d "Dependencies/protobuf" ]; then
