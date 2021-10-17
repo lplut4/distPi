@@ -12,32 +12,30 @@ namespace SubscriberWindowWPF
 
         public MainWindow()
         {
-            m_redisClient = new RedisClient("raspberrypi");
+            var redisHost = "raspberrypi";
+
+            var args = App.GetApplicationArgs();
+            if (args.Count > 0)
+            {
+                redisHost = args[0];
+            }
+
+            m_redisClient = new RedisClient(redisHost);
             var dataModelLibrary = ReflectiveDataModelCollection.GetSerializableTypes();
 
             InitializeComponent();
 
-            m_redisGridAdapter = new RedisDataGridAdapter(this, "raspberrypi", m_dataGrid);
+            m_redisGridAdapter = new RedisDataGridAdapter(this, redisHost, m_dataGrid);
             m_redisGridAdapter.start( dataModelLibrary );
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (!m_redisClient.IsSocketConnected())
-            {
-                return;
-            }
-
             m_redisClient.PublishMessage("channel-1", "pushed button 1");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            if ( !m_redisClient.IsSocketConnected() )
-            {
-                return;
-            }
-
             var time = new TimeSpec();
             time.TvNsec = 1;
             time.TvSec = 1000;
