@@ -23,16 +23,25 @@ namespace SubscriberWindowWPF
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (!m_redisClient.IsSocketConnected())
+            {
+                return;
+            }
+
             m_redisClient.PublishMessage("channel-1", "pushed button 1");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            if ( !m_redisClient.IsSocketConnected() )
+            {
+                return;
+            }
+
             var time = new TimeSpec();
             time.TvNsec = 1;
             time.TvSec = 1000;
             byte[] buffer = ReflectiveDataModelCollection.Serialize(time);
-
             m_redisClient.Publish(time.GetType().FullName, buffer);
         }
 
