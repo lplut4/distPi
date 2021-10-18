@@ -14,9 +14,7 @@ if not exist "out\python" ( mkdir out\python || set error=1 )
 
 cd Protos
 
-set protoDir=..\..\Dependencies\protocWin
-set includeDir=%protoDir%\include
-set protoc=%protoDir%\bin\protoc.exe
+set protoc=..\..\Dependencies\protobuf\cmake\build\Release\protoc.exe
 
 set protocOptions=--cpp_out=..\out\cpp --csharp_out=..\out\csharp --python_out=..\out\python
 

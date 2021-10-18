@@ -12,16 +12,6 @@ else
 	echo "Redis already exists"
 fi
 	
-if [ ! -d "Dependencies/hiredis" ]; then
-	echo Pulling hiredis...
-	mkdir -p Dependencies
-	cd Dependencies
-	git clone https://github.com/redis/hiredis.git
-	cd ..
-else
-	echo "hiredis already exists"
-fi
-	
 if [ ! -d "Dependencies/redis-plus-plus" ]; then
 	echo Pulling redis-plus-plus...
 	mkdir -p Dependencies

@@ -16,7 +16,7 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tool
 echo ####################
 echo # Building hiredis #
 echo ####################
-cd %rootDir%\Dependencies\hiredis
+cd %rootDir%\Dependencies\Redis\deps\hiredis
 mkdir build
 cd build
 echo Running CMake...
@@ -31,15 +31,15 @@ cd %rootDir%\Dependencies\redis-plus-plus
 mkdir build
 cd build
 echo Running CMake...
-set libDir=%rootDir%\Dependencies\hiredis\build\Release
-set cmakeArgs=-DHIREDIS_HEADER=%rootDir%\Dependencies  -DHIREDIS_LIB=%libDir%\hiredis.lib -DCMAKE_PREFIX_PATH=%rootDir%\Dependencies\hiredis\build\Release -DREDIS_PLUS_PLUS_CXX_STANDARD=11
+set libDir=%rootDir%\Dependencies\Redis\deps\hiredis\build\Release
+set cmakeArgs=-DHIREDIS_HEADER=%rootDir%\Dependencies\Redis\deps  -DHIREDIS_LIB=%libDir%\hiredis.lib -DCMAKE_PREFIX_PATH=%rootDir%\Dependencies\Redis\deps\hiredis\build\Release -DREDIS_PLUS_PLUS_CXX_STANDARD=11
 cmake %cmakeArgs% .. || set error=1
 echo Building hiredis...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 redis++.sln || set error=1
 
-echo ###############################
+echo ################################
 echo # Building StackExchange.Redis #
-echo ###############################
+echo ################################
 cd %rootDir%\Dependencies\StackExchange.Redis\
 echo Nuget Package Restore...
 %msbuild% /m /t:restore /verbosity:quiet /noLogo StackExchange.Redis.sln || set error=1

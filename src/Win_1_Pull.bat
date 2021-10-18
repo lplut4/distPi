@@ -24,20 +24,9 @@ if not exist "Dependencies\Redis" (
 	echo Redis already exists
 )
 
-echo ###################
-echo # Pulling hiredis #
-echo ###################
-if not exist "Dependencies\hiredis" (
-	cd Dependencies || set error=1
-	git clone https://github.com/redis/hiredis.git || set error=1
-	cd ..
-) else (
-	echo hiredis already exists
-)
-
 echo ###########################
 echo # Pulling redis-plus-plus #
-echo ############################
+echo ###########################
 if not exist "Dependencies\redis-plus-plus" (
 	cd Dependencies || set error=1
 	git clone https://github.com/sewenew/redis-plus-plus.git || set error=1
@@ -68,20 +57,6 @@ if not exist "Dependencies\Protobuf" (
 	cd ..\..
 ) else (
 	echo Protobuf already exists
-)
-
-echo ##############################
-echo # Pulling protoc for Windows #
-echo ##############################
-if not exist "Dependencies\protocWin" (
-	mkdir Dependencies\protocWin || set error=1
-	mkdir Dependencies\_Downloads
-	cd Dependencies\_Downloads || set error=1
-	powershell wget https://github.com/protocolbuffers/protobuf/releases/download/v3.18.1/protoc-3.18.1-win32.zip -OutFile protoc-win32.zip || set error=1
-	powershell Expand-Archive protoc-win32.zip -DestinationPath ..\protocWin || set error=1
-	cd ..\..
-) else (
-	echo ProtobufWin already exists
 )
 
 if exist Dependencies\_Downloads ( rmdir /S /Q Dependencies\_Downloads )
