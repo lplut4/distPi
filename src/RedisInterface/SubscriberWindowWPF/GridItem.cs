@@ -1,8 +1,8 @@
 ﻿namespace SubscriberWindowWPF
 {
-    internal class Item
+    internal class GridItem
     {
-        public Item()
+        public GridItem()
         {
         }
 

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using StackExchange.Redis;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Threading;
 using DataModel;
 
 namespace SubscriberWindowWPF
@@ -11,18 +9,45 @@ namespace SubscriberWindowWPF
     class RedisDataGridAdapter
     { 
         private MainWindow            m_mainWindow;
+        private readonly string       m_redisHost;
         private ConnectionMultiplexer m_redisClient;
         private DataGrid              m_dataGrid;
+        private bool                  m_started;
 
-        public RedisDataGridAdapter( MainWindow mainWindow, ConnectionMultiplexer redisClient, DataGrid dataGrid )
+        public RedisDataGridAdapter( MainWindow mainWindow, string redisHost, DataGrid dataGrid )
         {
             m_mainWindow  = mainWindow;
-            m_redisClient = redisClient;
+            m_redisHost   = redisHost;
+            m_redisClient = null;
             m_dataGrid    = dataGrid;
+            m_started     = false;
         }
 
         public void start( List<Type> dataToSubscribeTo )
         {
+            if ( m_started )
+            {
+                return;
+            }
+
+            startAdapter( dataToSubscribeTo );
+            m_mainWindow.setRedisClient(m_redisClient);
+
+            m_started = true;
+        }
+
+        private void startAdapter( List<Type> dataToSubscribeTo )
+        {
+            ConfigurationOptions options = new ConfigurationOptions();
+
+            // TODO - Need to figure out how to deal with connection drop-outs
+
+            // Continue trying to connect until a connection is established
+            options.ConnectRetry = int.MaxValue;  
+            options.EndPoints.Add(m_redisHost);
+
+            m_redisClient = ConnectionMultiplexer.Connect(options);
+
             var channelsToSubscribe = new List<string>();
 
             channelsToSubscribe.Add("Node Info");
@@ -31,47 +56,18 @@ namespace SubscriberWindowWPF
             channelsToSubscribe.Add("channel-3");
             channelsToSubscribe.Add("channel-4");
 
-            foreach ( var data in dataToSubscribeTo )
+            foreach (var data in dataToSubscribeTo)
             {
                 channelsToSubscribe.Add(data.FullName);
             }
 
+            foreach (var channel in channelsToSubscribe)
             {
-                var column = new DataGridTextColumn();
-                column.Header = "Local Time";
-                column.Binding = new Binding("LocalTime");
-                m_dataGrid.Columns.Add(column);
+                var sub = m_redisClient.GetSubscriber();
+                sub.Subscribe(channel).OnMessage(channelMessage => {
+                    recordByteMessage(channelMessage.Message, channel);
+                });
             }
-            {
-                var column = new DataGridTextColumn();
-                column.Header = "Channel";
-                column.Binding = new Binding("Channel");
-                m_dataGrid.Columns.Add(column);
-            }
-            {
-                var column = new DataGridTextColumn();
-                column.Header = "Data";
-                column.Binding = new Binding("Data");
-                m_dataGrid.Columns.Add(column);
-            }
-
-            var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
-            m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = "Connecting to ", Data = m_redisClient.ClientName });
-
-            new Thread(() =>
-            {
-                foreach ( var channel in channelsToSubscribe )
-                {
-                    var sub = m_redisClient.GetSubscriber();
-                    sub.Subscribe(channel).OnMessage( channelMessage => { 
-                        recordByteMessage(channelMessage.Message, channel);
-                    });
-                }
-                m_mainWindow.Dispatcher.Invoke((Action)(() =>
-                {
-                    m_dataGrid.Items.Clear();
-                }));
-            }).Start();
         }
 
         private void recordByteMessage(byte[] buffer, string channel)
@@ -93,7 +89,7 @@ namespace SubscriberWindowWPF
                 {
                     var data = ReflectiveDataModelCollection.Deserialize(dataType, buffer);
                     var decodedData = ReflectiveDataModelCollection.DecodeMessage(data);
-                    m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = channel, Data = decodedData });
+                    m_dataGrid.Items.Add(new GridItem() { LocalTime = timeStamp, Channel = channel, Data = decodedData });
                 }
                 catch (Google.Protobuf.InvalidProtocolBufferException)
                 {
@@ -107,7 +103,7 @@ namespace SubscriberWindowWPF
             m_mainWindow.Dispatcher.Invoke((Action)(() =>
             {
                 var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
-                m_dataGrid.Items.Add(new Item() { LocalTime = timeStamp, Channel = channel, Data = msg });
+                m_dataGrid.Items.Add(new GridItem() { LocalTime = timeStamp, Channel = channel, Data = msg });
             }));
         }
     }
