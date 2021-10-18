@@ -35,9 +35,9 @@ if not exist "Dependencies\redis-plus-plus" (
 	echo redis-plus-plus already exists
 )
 
-echo ##############################
+echo ###############################
 echo # Pulling StackExchange.Redis #
-echo ##############################	
+echo ###############################	
 if not exist "Dependencies\StackExchange.Redis" (
 	cd Dependencies || set error=1
 	git clone https://github.com/StackExchange/StackExchange.Redis.git || set error=1

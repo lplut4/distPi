@@ -30,7 +30,7 @@ int main()
     auto redisHost = "";
     std::vector<std::string> channelSubscriptions;
 
-    redisHost = "tcp://raspberrypi:6379";
+    redisHost = "tcp://localhost:6379";
     channelSubscriptions.push_back( "Node Info" );
     channelSubscriptions.push_back( "channel-1" );
     channelSubscriptions.push_back( "channel-2" );
