@@ -14,6 +14,12 @@
     <ClCompile Include="ExampleMicroservice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\DataModel\out\cpp\LogMessage.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\DataModel\out\cpp\TimeSpec.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="uuid.h">

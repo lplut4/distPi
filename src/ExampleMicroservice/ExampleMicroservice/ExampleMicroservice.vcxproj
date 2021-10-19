@@ -62,7 +62,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\Dependencies\redis-plus-plus\build\Release;..\..\Dependencies\Redis\deps\hiredis\build\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Dependencies\redis-plus-plus\build\Release;..\..\Dependencies\Redis\deps\hiredis\build\Release;..\..\Dependencies\protobuf\cmake\build\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Link>
@@ -88,9 +88,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\Dependencies\redis-plus-plus\build\Release;..\..\Dependencies\Redis\deps\hiredis\build\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\Dependencies\redis-plus-plus\build\Release;..\..\Dependencies\Redis\deps\hiredis\build\Release;..\..\Dependencies\protobuf\cmake\build\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libprotobuf.lib</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>copy $(SolutionDir)..\Dependencies\Redis\deps\hiredis\build\Release\hiredis.dll $(SolutionDir)x64\Release\</Command>
@@ -98,6 +97,8 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\DataModel\out\cpp\LogMessage.pb.cc" />
+    <ClCompile Include="..\..\DataModel\out\cpp\TimeSpec.pb.cc" />
     <ClCompile Include="ExampleMicroservice.cpp" />
   </ItemGroup>
   <ItemGroup>

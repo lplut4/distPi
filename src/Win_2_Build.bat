@@ -20,7 +20,7 @@ cd %rootDir%\Dependencies\Redis\deps\hiredis
 mkdir build
 cd build
 echo Running CMake...
-cmake .. || set error=1
+cmake -Wno-dev .. || set error=1
 echo Building hiredis...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 hiredis.sln || set error=1
 
@@ -53,7 +53,7 @@ cd %rootDir%\Dependencies\protobuf\cmake\
 mkdir build
 cd build
 echo Running CMake...
-set cmakeArgs=-G "Visual Studio 16 2019" -DCMAKE_INSTALL_PREFIX=install
+set cmakeArgs=-G "Visual Studio 16 2019" -DCMAKE_INSTALL_PREFIX=install -Dprotobuf_MSVC_STATIC_RUNTIME=OFF
 cmake %cmakeArgs% .. || set error=1
 echo Building protobuf...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 protobuf.sln || set error=1

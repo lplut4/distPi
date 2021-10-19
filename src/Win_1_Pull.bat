@@ -29,7 +29,7 @@ echo # Pulling redis-plus-plus #
 echo ###########################
 if not exist "Dependencies\redis-plus-plus" (
 	cd Dependencies || set error=1
-	git clone https://github.com/sewenew/redis-plus-plus.git || set error=1
+	git clone -b 1.3.2 https://github.com/sewenew/redis-plus-plus.git || set error=1
 	cd ..
 ) else (
 	echo redis-plus-plus already exists
@@ -40,7 +40,7 @@ echo # Pulling StackExchange.Redis #
 echo ###############################	
 if not exist "Dependencies\StackExchange.Redis" (
 	cd Dependencies || set error=1
-	git clone https://github.com/StackExchange/StackExchange.Redis.git || set error=1
+	git clone -b 2.2.79 https://github.com/StackExchange/StackExchange.Redis.git || set error=1
 	cd ..
 ) else (
 	echo StackExchange.Redis already exists
@@ -51,7 +51,7 @@ echo # Pulling Protobuf #
 echo ####################
 if not exist "Dependencies\Protobuf" (
 	cd Dependencies || set error=1
-	git clone https://github.com/protocolbuffers/protobuf.git || set error=1
+	git clone -b v3.18.1 https://github.com/protocolbuffers/protobuf.git || set error=1
 	cd protobuf
 	git submodule update --init --recursive
 	cd ..\..

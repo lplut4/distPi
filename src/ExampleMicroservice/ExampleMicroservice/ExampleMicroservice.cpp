@@ -6,9 +6,10 @@
 #include "Libs.h"
 #include "uuid.h"
 
-//#include "TimeSpec.ph.h"
-//#include "LogMessage.ph.h"
-//#include "../../DataModel/out/cpp/TimeSpec.pb.h"
+#include <time.h>
+
+#include "../../DataModel/out/cpp/LogMessage.pb.h"
+#include "../../DataModel/out/cpp/TimeSpec.pb.h"
 
 std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
 {
@@ -21,8 +22,18 @@ std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
     return "UNKNOWN";
 }
 
+void publish(sw::redis::Redis& redis, const google::protobuf::Message& message)
+{
+    auto fullName = message.GetDescriptor()->full_name();
+    auto serializedData = message.SerializeAsString();
+
+    redis.publish( fullName, serializedData );
+}
+
 int runService( char* redisHost, std::vector<std::string> channelSubscriptions )
 {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
     std::string uuid = newUUID();
     std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
     std::cout << "Attempting to connect to " << redisHost << std::endl;
@@ -51,9 +62,25 @@ int runService( char* redisHost, std::vector<std::string> channelSubscriptions )
             sub.subscribe(channelSubscriptions.begin(), channelSubscriptions.end());
 
             connectedOnce = true;
+         
 
-            redis.publish("Node Info", "New ExampleMicroservice is up: " + uuid);
+            DataModel::LogMessage logMessage;
 
+            struct timespec ts;
+            timespec_get(&ts, TIME_UTC);
+
+            DataModel::TimeSpec spec;
+            spec.set_tv_sec(ts.tv_sec);
+            spec.set_tv_nsec(ts.tv_nsec);
+
+            std::string message( "New ExampleMicroservice is up: " + uuid );
+
+            logMessage.set_allocated_timeoflog(&spec);
+            logMessage.set_category(DataModel::LogMessage_Category_INFO);
+            logMessage.set_allocated_message(&message);
+
+            publish(redis, logMessage);
+            
             while (true)
             {
                 try
@@ -72,9 +99,10 @@ int runService( char* redisHost, std::vector<std::string> channelSubscriptions )
         }
     }
 
+    google::protobuf::ShutdownProtobufLibrary();
+
     return 0;
 }
-
 
 int main(int argc, char* argv[])
 {
