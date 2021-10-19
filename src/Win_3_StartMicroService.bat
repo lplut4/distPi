@@ -1,3 +1,3 @@
 @echo off
 
-start ExampleMicroservice\x64\Release\ExampleMicroservice.exe || ( echo Could not find executable! & pause )
+start ExampleMicroservice\x64\Release\ExampleMicroservice.exe localhost || ( echo Could not find executable! & pause )
