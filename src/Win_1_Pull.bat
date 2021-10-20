@@ -24,6 +24,20 @@ if not exist "Dependencies\Redis" (
 	echo Redis already exists
 )
 
+echo #############################
+echo # Pulling Redis for Windows #
+echo #############################
+if not exist "Dependencies\WinRedis" (
+	mkdir Dependencies\WinRedis || set error=1
+	mkdir Dependencies\_Downloads || set error=1
+	cd Dependencies\_Downloads || set error=1
+	powershell wget https://github.com/microsoftarchive/redis/archive/refs/tags/win-3.0.504.tar.gz -OutFile WinRedis.tar.gz
+	tar xzf WinRedis.tar.gz --directory ..\WinRedis --strip-components=1 || set error=1
+	cd ..\..
+) else (
+	echo WinRedis already exists
+)
+
 echo ###########################
 echo # Pulling redis-plus-plus #
 echo ###########################
