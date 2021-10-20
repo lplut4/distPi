@@ -15,7 +15,7 @@ echo # Pulling Redis #
 echo #################
 if not exist "Dependencies\Redis" (
 	mkdir Dependencies\Redis || set error=1
-	mkdir Dependencies\_Downloads || set error=1
+	mkdir Dependencies\_Downloads
 	cd Dependencies\_Downloads || set error=1
 	curl --output redis.tar.gz --url https://download.redis.io/releases/redis-6.2.6.tar.gz || set error=1
 	tar xzf redis.tar.gz --directory ..\Redis --strip-components=1 || set error=1
@@ -29,7 +29,7 @@ echo # Pulling Redis for Windows #
 echo #############################
 if not exist "Dependencies\WinRedis" (
 	mkdir Dependencies\WinRedis || set error=1
-	mkdir Dependencies\_Downloads || set error=1
+	mkdir Dependencies\_Downloads
 	cd Dependencies\_Downloads || set error=1
 	powershell wget https://github.com/microsoftarchive/redis/archive/refs/tags/win-3.0.504.tar.gz -OutFile WinRedis.tar.gz
 	tar xzf WinRedis.tar.gz --directory ..\WinRedis --strip-components=1 || set error=1

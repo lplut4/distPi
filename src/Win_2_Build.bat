@@ -13,6 +13,13 @@ set error=0
 
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 
+echo #####################
+echo # Building WinRedis #
+echo #####################
+cd %rootDir%\Dependencies\WinRedis\msvs
+echo Building WinRedis...
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 RedisServer.sln || set error=1
+
 echo ####################
 echo # Building hiredis #
 echo ####################
