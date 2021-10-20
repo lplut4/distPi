@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace DataModel
 {
@@ -52,16 +51,6 @@ namespace DataModel
             }
 
             return serializableTypesByFullName[fullName];
-        }
-
-        public static string DecodeMessage(Google.Protobuf.IMessage message)
-        {
-            var builder = new StringBuilder();
-            foreach (var field in message.Descriptor.Fields.InDeclarationOrder())
-            {
-                builder.Append(field.Name).Append(": ").Append(field.Accessor.GetValue(message)).Append( "  " );
-            }
-            return builder.ToString();
         }
 
         public static byte[] Serialize(Google.Protobuf.IMessage message)

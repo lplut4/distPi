@@ -47,8 +47,7 @@ namespace SubscriberWindowWPF
         {
             ConfigurationOptions options = new ConfigurationOptions();
 
-            // Continue trying to connect until a connection is established
-            options.ConnectRetry = int.MaxValue;  
+            options.ConnectRetry = int.MaxValue;  // Continue trying to connect until a connection is established
             options.EndPoints.Add(m_redisHost);
 
             m_redisClient = ConnectionMultiplexer.Connect(options);
@@ -104,8 +103,8 @@ namespace SubscriberWindowWPF
             try
             {
                 var data = ReflectiveDataModelCollection.Deserialize(dataType, buffer);
-                var decodedData = ReflectiveDataModelCollection.DecodeMessage(data);
-                m_mainWindow.WriteToGrid(channel, decodedData);
+                var jsonString = Google.Protobuf.JsonFormatter.Default.Format(data);
+                m_mainWindow.WriteToGrid(channel, jsonString);
             }
             catch (Google.Protobuf.InvalidProtocolBufferException)
             {

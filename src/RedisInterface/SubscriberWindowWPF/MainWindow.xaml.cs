@@ -127,11 +127,27 @@ namespace SubscriberWindowWPF
 
         private void DataGrid_MouseDoubleClick( object sender, MouseEventArgs e )
         { 
-            // Example of inspecting the selected cell of the data column
-            DataGrid dataGrid = sender as DataGrid;
-            DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(dataGrid.SelectedIndex);
-            DataGridCell RowColumn = dataGrid.Columns[2].GetCellContent(row).Parent as DataGridCell;
-            string CellValue = ((TextBlock)RowColumn.Content).Text;
+            var dataGrid = sender as DataGrid;
+            var row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(dataGrid.SelectedIndex);
+
+            var timeCell = dataGrid.Columns[0].GetCellContent(row).Parent as DataGridCell;
+            var timeCellValue = ((TextBlock)timeCell.Content).Text;
+
+            var channelCell = dataGrid.Columns[1].GetCellContent(row).Parent as DataGridCell;
+            var channelCellValue = ((TextBlock)channelCell.Content).Text;
+
+            var dataCell = dataGrid.Columns[2].GetCellContent(row).Parent as DataGridCell;
+            var dataCellValue = ((TextBlock)dataCell.Content).Text;
+
+            try 
+            {
+                var dataTreeView = new DataTreeView(timeCellValue, channelCellValue, dataCellValue);
+                dataTreeView.Show();
+            }
+            catch (Exception)
+            {
+
+            }
         }
     }
 }
