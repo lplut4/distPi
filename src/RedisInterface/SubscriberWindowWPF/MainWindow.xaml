@@ -5,19 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SubscriberWindowWPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Background="#FF2D2D30" Foreground="Black">
+        Title="Message View" Height="450" Width="800" Background="#FF2D2D30" Foreground="Black">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="362*"/>
-            <ColumnDefinition Width="431*"/>
+            <ColumnDefinition Width="397*"/>
+            <ColumnDefinition Width="396*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="206*"/>
             <RowDefinition Height="39*"/>
             <RowDefinition Height="175*"/>
         </Grid.RowDefinitions>
-        <DataGrid x:Name="m_dataGrid" Grid.ColumnSpan="2" Margin="0,0,0.333,35.667" Grid.RowSpan="3" IsReadOnly="True" SelectionChanged="m_dataGrid_SelectionChanged"/>
-        <Button Content="Channel 1 Random Message" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Row="2" VerticalAlignment="Bottom" Width="175" Click="Button_Click"/>
-        <Button Content="Channel 2 Random Message" HorizontalAlignment="Left" Margin="190,0,0,10" Grid.Row="2" VerticalAlignment="Bottom" Width="177" Grid.ColumnSpan="2" Click="Button_Click_1"/>
+        <DataGrid x:Name="m_dataGrid" Grid.ColumnSpan="2" Margin="0,0,0.333,35.667" Grid.RowSpan="3" IsReadOnly="True" MouseDoubleClick="DataGrid_MouseDoubleClick"/>
+        <Button Content="Channel 1 Random Message" HorizontalAlignment="Left" Margin="10,0,0,8.667" Grid.Row="2" VerticalAlignment="Bottom" Width="175" Click="Button1_Click" Height="21"/>
+        <Button Content="Channel 2 Random Message" HorizontalAlignment="Left" Margin="190,0,0,8.667" Grid.Row="2" VerticalAlignment="Bottom" Width="177" Click="Button2_Click" Height="21"/>
+        <CheckBox x:Name="m_autoScrollCheckbox" Content="Auto-scroll" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,10.333,9.667" Grid.Row="2" VerticalAlignment="Bottom" Foreground="White" IsChecked="True" Height="16" Width="79"/>
+        <Label x:Name="m_statusLabel" Content="Label" HorizontalAlignment="Left" Margin="397,0,0,6.667" Grid.Row="2" VerticalAlignment="Bottom" Foreground="White" Grid.ColumnSpan="2" Visibility="Hidden"/>
     </Grid>
 </Window>

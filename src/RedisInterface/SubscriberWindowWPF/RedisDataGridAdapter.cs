@@ -3,15 +3,21 @@ using System.Collections.Generic;
 using StackExchange.Redis;
 using System.Windows.Controls;
 using DataModel;
+using System.Windows.Media;
+using System.Text;
 
 namespace SubscriberWindowWPF
 {
     class RedisDataGridAdapter
-    { 
+    {
+        private SolidColorBrush WHITE  = new SolidColorBrush(Colors.White);
+        private SolidColorBrush GREEN  = new SolidColorBrush(Colors.LightGreen);
+        private SolidColorBrush YELLOW = new SolidColorBrush(Colors.Yellow);
+        private SolidColorBrush RED    = new SolidColorBrush(Colors.Red);
+
         private MainWindow            m_mainWindow;
         private readonly string       m_redisHost;
         private ConnectionMultiplexer m_redisClient;
-        private DataGrid              m_dataGrid;
         private bool                  m_started;
 
         public RedisDataGridAdapter( MainWindow mainWindow, string redisHost, DataGrid dataGrid )
@@ -19,34 +25,35 @@ namespace SubscriberWindowWPF
             m_mainWindow  = mainWindow;
             m_redisHost   = redisHost;
             m_redisClient = null;
-            m_dataGrid    = dataGrid;
             m_started     = false;
         }
 
-        public void start( List<Type> dataToSubscribeTo )
+        public void Start( List<Type> dataToSubscribeTo )
         {
             if ( m_started )
             {
                 return;
             }
 
-            startAdapter( dataToSubscribeTo );
-            m_mainWindow.setRedisClient(m_redisClient);
+            m_mainWindow.SetStatus("Connecting to: " + m_redisHost, WHITE);
+
+            StartAdapter( dataToSubscribeTo );
+            m_mainWindow.SetRedisClient(m_redisClient);
 
             m_started = true;
         }
 
-        private void startAdapter( List<Type> dataToSubscribeTo )
+        private void StartAdapter( List<Type> dataToSubscribeTo )
         {
             ConfigurationOptions options = new ConfigurationOptions();
-
-            // TODO - Need to figure out how to deal with connection drop-outs
 
             // Continue trying to connect until a connection is established
             options.ConnectRetry = int.MaxValue;  
             options.EndPoints.Add(m_redisHost);
 
             m_redisClient = ConnectionMultiplexer.Connect(options);
+            m_redisClient.ConnectionFailed   += ConnectionFailed;
+            m_redisClient.ConnectionRestored += ConnectionRestored;
 
             var channelsToSubscribe = new List<string>();
 
@@ -61,50 +68,50 @@ namespace SubscriberWindowWPF
                 channelsToSubscribe.Add(data.FullName);
             }
 
+            var subscriptions = new StringBuilder();
             foreach (var channel in channelsToSubscribe)
             {
+                subscriptions.Append(channel).Append(", ");
                 var sub = m_redisClient.GetSubscriber();
-                sub.Subscribe(channel).OnMessage(channelMessage => {
-                    recordByteMessage(channelMessage.Message, channel);
-                });
+                sub.Subscribe( channel ).OnMessage( channelMessage => { RecordByteMessage( channelMessage.Message, channel ); } );
             }
+
+            m_mainWindow.SetStatus("Connected to: " + m_redisHost, GREEN);
+            m_mainWindow.WriteToGrid("EVENT", "Subscribed to: " + subscriptions.ToString().TrimEnd( new char[] { ' ', ',' } ) );
         }
 
-        private void recordByteMessage(byte[] buffer, string channel)
+        private void ConnectionFailed(object sender, ConnectionFailedEventArgs e)
         {
-            m_mainWindow.Dispatcher.Invoke((Action)(() =>
-            {
-                var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
-
-                var dataType = ReflectiveDataModelCollection.GetSerializableType(channel);
-
-                if (dataType == null)
-                {
-                    var str = System.Text.Encoding.Default.GetString(buffer);
-                    recordMessage(str, channel);
-                    return;
-                }
-
-                try
-                {
-                    var data = ReflectiveDataModelCollection.Deserialize(dataType, buffer);
-                    var decodedData = ReflectiveDataModelCollection.DecodeMessage(data);
-                    m_dataGrid.Items.Add(new GridItem() { LocalTime = timeStamp, Channel = channel, Data = decodedData });
-                }
-                catch (Google.Protobuf.InvalidProtocolBufferException)
-                {
-                    // Control message?  Should we ignore it?
-                }
-            }));
+            m_mainWindow.SetStatus("Dropped connection to: " + e.EndPoint, RED);
         }
 
-        private void recordMessage(string msg, string channel)
+        private void ConnectionRestored(object sender, ConnectionFailedEventArgs e)
         {
-            m_mainWindow.Dispatcher.Invoke((Action)(() =>
+            m_mainWindow.SetStatus("Reconnected to: " + e.EndPoint, YELLOW);
+        }
+
+        private void RecordByteMessage(byte[] buffer, string channel)
+        {          
+            var dataType = ReflectiveDataModelCollection.GetSerializableType(channel);
+
+            if (dataType == null)
             {
-                var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
-                m_dataGrid.Items.Add(new GridItem() { LocalTime = timeStamp, Channel = channel, Data = msg });
-            }));
+                var str = Encoding.Default.GetString(buffer);
+                m_mainWindow.WriteToGrid(channel, str);
+                return;
+            }
+
+            try
+            {
+                var data = ReflectiveDataModelCollection.Deserialize(dataType, buffer);
+                var decodedData = ReflectiveDataModelCollection.DecodeMessage(data);
+                m_mainWindow.WriteToGrid(channel, decodedData);
+            }
+            catch (Google.Protobuf.InvalidProtocolBufferException)
+            {
+                var str = Encoding.Default.GetString(buffer);
+                m_mainWindow.WriteToGrid(channel, str);
+            }
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 using DataModel;
 using StackExchange.Redis;
 
@@ -45,30 +46,61 @@ namespace SubscriberWindowWPF
                 m_dataGrid.Columns.Add(column);
             }
 
-            var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
-            m_dataGrid.Items.Add(new GridItem() { LocalTime = timeStamp, Channel = "Connecting to ", Data = redisHost });
-
             m_redisGridAdapter = new RedisDataGridAdapter(this, redisHost, m_dataGrid);
 
             new Thread(() =>
             {
                 var dataModelLibrary = ReflectiveDataModelCollection.GetSerializableTypes();
-                m_redisGridAdapter.start(dataModelLibrary);
+                m_redisGridAdapter.Start(dataModelLibrary);
             }).Start();
         }
 
-        public void setRedisClient( ConnectionMultiplexer redisClient )
+        public void SetRedisClient( ConnectionMultiplexer redisClient )
         {
             m_redisClient = redisClient;
+        }
+
+        public void SetStatus( string status, Brush color )
+        {
+            var statusChanged = false;
             this.Dispatcher.Invoke((Action)(() =>
             {
-                m_dataGrid.Items.Clear();
+                statusChanged = !m_statusLabel.Content.ToString().Equals(status);
+                m_statusLabel.Content = status;
+                m_statusLabel.Visibility = Visibility.Visible;
+                m_statusLabel.Foreground = color;
+            }));
+
+            if (statusChanged)
+            {
+                WriteToGrid("EVENT", status);
+            }
+        }
+
+        public void WriteToGrid(string channel, string data)
+        {
+            this.Dispatcher.Invoke((Action)(() =>
+            {
+                var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff");
+                m_dataGrid.Items.Add(new GridItem() { LocalTime = timeStamp, Channel = channel, Data = data });
+
+                var performAutoScroll = m_autoScrollCheckbox.IsChecked.HasValue ? m_autoScrollCheckbox.IsChecked.Value : false;
+
+                if (performAutoScroll && m_dataGrid.Items.Count > 0)
+                {
+                    var border = VisualTreeHelper.GetChild(m_dataGrid, 0) as Decorator;
+                    if (border != null)
+                    {
+                        var scroll = border.Child as ScrollViewer;
+                        if (scroll != null) scroll.ScrollToEnd();
+                    }
+                }
             }));
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button1_Click(object sender, RoutedEventArgs e)
         {
-            if (m_redisClient == null)
+            if (m_redisClient == null || !m_redisClient.IsConnected)
             {
                 return;
             }
@@ -77,9 +109,9 @@ namespace SubscriberWindowWPF
             subscriber.Publish("channel-1", "pushed button 1");
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Button2_Click(object sender, RoutedEventArgs e)
         {
-            if (m_redisClient == null)
+            if (m_redisClient == null || !m_redisClient.IsConnected)
             {
                 return;
             }
@@ -93,8 +125,8 @@ namespace SubscriberWindowWPF
             subscriber.Publish(time.GetType().FullName, buffer);
         }
 
-        private void m_dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
+        private void DataGrid_MouseDoubleClick( object sender, MouseEventArgs e )
+        { 
             // Example of inspecting the selected cell of the data column
             DataGrid dataGrid = sender as DataGrid;
             DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(dataGrid.SelectedIndex);
