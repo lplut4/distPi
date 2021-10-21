@@ -98,6 +98,23 @@ namespace SubscriberWindowWPF
             }));
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            if (m_redisClient != null)
+            {
+                m_redisClient.Close(true);
+                m_redisClient.Dispose();
+                m_redisClient = null;
+            }
+            if (m_redisGridAdapter != null)
+            {
+                m_redisGridAdapter.Dispose();
+                m_redisGridAdapter = null;
+            }
+            Application.Current.Shutdown();
+        }
+
         private void Button1_Click(object sender, RoutedEventArgs e)
         {
             if (m_redisClient == null || !m_redisClient.IsConnected)

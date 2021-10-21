@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SubscriberWindowWPF
 {
-    class RedisDataGridAdapter
+    public class RedisDataGridAdapter : IDisposable
     {
         private SolidColorBrush WHITE  = new SolidColorBrush(Colors.White);
         private SolidColorBrush GREEN  = new SolidColorBrush(Colors.LightGreen);
@@ -19,6 +19,7 @@ namespace SubscriberWindowWPF
         private readonly string       m_redisHost;
         private ConnectionMultiplexer m_redisClient;
         private bool                  m_started;
+        private bool                  m_terminateApp;
 
         public RedisDataGridAdapter( MainWindow mainWindow, string redisHost, DataGrid dataGrid )
         {
@@ -26,6 +27,16 @@ namespace SubscriberWindowWPF
             m_redisHost   = redisHost;
             m_redisClient = null;
             m_started     = false;
+        }
+
+        public void Dispose()
+        {
+            m_terminateApp = true;
+            if (m_redisClient != null)
+            {
+                m_redisClient.Close(true);
+                m_redisClient.Dispose();
+            }
         }
 
         public void Start( List<Type> dataToSubscribeTo )
@@ -47,12 +58,29 @@ namespace SubscriberWindowWPF
         {
             ConfigurationOptions options = new ConfigurationOptions();
 
-            options.ConnectRetry = int.MaxValue;  // Continue trying to connect until a connection is established
-            options.EndPoints.Add(m_redisHost);
+            options.EndPoints.Add( m_redisHost );
+            options.ConnectRetry = 1;
+            options.ConnectTimeout = 1000;
 
-            m_redisClient = ConnectionMultiplexer.Connect(options);
-            m_redisClient.ConnectionFailed   += ConnectionFailed;
-            m_redisClient.ConnectionRestored += ConnectionRestored;
+            while (m_redisClient == null && !m_terminateApp)
+            {
+                try
+                {
+                    m_redisClient = ConnectionMultiplexer.Connect(options);
+                    m_redisClient.ConnectionFailed   += ConnectionFailed;
+                    m_redisClient.ConnectionRestored += ConnectionRestored;
+                }
+                catch (RedisConnectionException)
+                {
+                    // Try again rather than waiting indefinitely.
+                    // Forever sitting within the connect call prevents the App from terminating when the user closes the main window
+                }
+            }
+
+            if ( m_terminateApp || m_redisClient == null )
+            {
+                return;
+            }
 
             var channelsToSubscribe = new List<string>();
 
