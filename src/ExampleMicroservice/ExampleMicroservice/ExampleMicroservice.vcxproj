@@ -102,7 +102,10 @@
     <ClCompile Include="ExampleMicroservice.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExampleMicroservice.h" />
     <ClInclude Include="Libs.h" />
+    <ClInclude Include="PubSubMessage.h" />
+    <ClInclude Include="SafeQueue.h" />
     <ClInclude Include="uuid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

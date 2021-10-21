@@ -1,138 +1,244 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <iostream>
 #include <sw/redis++/redis++.h>
+#include <time.h>
+#include <thread>
 
 #include "Libs.h"
 #include "uuid.h"
-
-#include <time.h>
+#include "SafeQueue.h"
+#include "PubSubMessage.h"
+#include "ExampleMicroservice.h"
 
 #include "../../DataModel/out/cpp/LogMessage.pb.h"
 #include "../../DataModel/out/cpp/TimeSpec.pb.h"
 
-std::string msgTypeToString( sw::redis::Subscriber::MsgType type )
+std::string msgTypeToString(const sw::redis::Subscriber::MsgType& type)
 {
-    if ( type == sw::redis::Subscriber::MsgType::SUBSCRIBE    ) return "SUBSCRIBE";
-    if ( type == sw::redis::Subscriber::MsgType::UNSUBSCRIBE  ) return "UNSUBSCRIBE";
-    if ( type == sw::redis::Subscriber::MsgType::PSUBSCRIBE   ) return "PSUBSCRIBE";
-    if ( type == sw::redis::Subscriber::MsgType::PUNSUBSCRIBE ) return "PUNSUBSCRIBE";
-    if ( type == sw::redis::Subscriber::MsgType::MESSAGE      ) return "MESSAGE";
-    if ( type == sw::redis::Subscriber::MsgType::PMESSAGE     ) return "PMESSAGE";
-    return "UNKNOWN";
+	if (type == sw::redis::Subscriber::MsgType::SUBSCRIBE) return "SUBSCRIBE";
+	if (type == sw::redis::Subscriber::MsgType::UNSUBSCRIBE) return "UNSUBSCRIBE";
+	if (type == sw::redis::Subscriber::MsgType::PSUBSCRIBE) return "PSUBSCRIBE";
+	if (type == sw::redis::Subscriber::MsgType::PUNSUBSCRIBE) return "PUNSUBSCRIBE";
+	if (type == sw::redis::Subscriber::MsgType::MESSAGE) return "MESSAGE";
+	if (type == sw::redis::Subscriber::MsgType::PMESSAGE) return "PMESSAGE";
+	return "UNKNOWN";
 }
 
-void publish(sw::redis::Redis& redis, const google::protobuf::Message& message)
-{
-    auto fullName = message.GetDescriptor()->full_name();
-    auto serializedData = message.SerializeAsString();
+SafeQueue<PubSubMessage> publishQueue;
+SafeQueue<PubSubMessage> subscribeQueue;
 
-    redis.publish( fullName, serializedData );
+std::mutex redisMutex;
+sw::redis::Redis* redis = nullptr;
+bool continueProcessing = true;;
+
+void ExampleMicroservice::queueUpPublish(const google::protobuf::Message& message)
+{
+	publishQueue.enqueue(PubSubMessage(message));
 }
 
-int runService( char* redisHost, std::vector<std::string> channelSubscriptions )
+void ProcessPublishQueueTask()
 {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
+	while (continueProcessing)
+	{
+		auto pubMessage = publishQueue.dequeue();
 
-    std::string uuid = newUUID();
-    std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
-    std::cout << "Attempting to connect to " << redisHost << std::endl;
+		redisMutex.lock();
+		if (redis != nullptr)
+		{
+			redis->publish(pubMessage.fullName, pubMessage.serializedData);
+		}
+		redisMutex.unlock();
+	}
+}
 
-    auto connectedOnce = false;
+void queueUpSubscribe(const std::string& channel, const std::string& msg)
+{
+	subscribeQueue.enqueue(PubSubMessage(channel, msg));
+}
 
-    while (true)
-    {
-        try
-        {
-            auto redis = sw::redis::Redis::Redis(redisHost);
-            auto sub = redis.subscriber();
+void ProcessSubscribeQueueTask()
+{
+	while (continueProcessing)
+	{
+		auto subMessage = subscribeQueue.dequeue();
 
-            std::cout << std::endl << (connectedOnce ? "Reconnected!" : "Connected!") << std::endl;
+		// TODO - Figure out how to distribute these messages to the various internal "subscribers"
 
-            sub.on_message([](std::string channel, std::string msg)
-                {
-                    std::cout << "Received message: " << msg << " on " << channel << std::endl;
-                });
+		std::cout << "Received message: " << subMessage.serializedData << " on " << subMessage.fullName << std::endl;
+	}
+}
 
-            sub.on_meta([](sw::redis::Subscriber::MsgType type, sw::redis::OptionalString channel, long long num)
-                {
-                    std::cout << "Received " << msgTypeToString(type) << " on " << channel.value() << " number " << num << std::endl;
-                });
+void runSubscriber(sw::redis::Redis* redis, const std::vector<std::string>& channelSubscriptions, const std::string& uuid)
+{
+	auto redisExists = false;
 
-            sub.subscribe(channelSubscriptions.begin(), channelSubscriptions.end());
+	redisMutex.lock();
+	if (redis != nullptr)
+	{
+		redisExists = true;
+	}
+	redisMutex.unlock();
 
-            connectedOnce = true;
-         
+	if (!redisExists)
+	{
+		return;
+	}
 
-            DataModel::LogMessage logMessage;
+	auto sub = redis->subscriber();
 
-            struct timespec ts;
-            timespec_get(&ts, TIME_UTC);
+	std::cout << std::endl << "Connected!" << std::endl;
 
-            DataModel::TimeSpec spec;
-            spec.set_tv_sec(ts.tv_sec);
-            spec.set_tv_nsec(ts.tv_nsec);
+	sub.on_message([](std::string channel, std::string msg)
+		{
+			queueUpSubscribe(channel, msg);
+		});
 
-            std::string message( "New ExampleMicroservice is up: " + uuid );
+	sub.on_meta([](sw::redis::Subscriber::MsgType type, sw::redis::OptionalString channel, long long num)
+		{
+			std::cout << "Received " << msgTypeToString(type) << " on " << channel.value() << " number " << num << std::endl;
+		});
 
-            logMessage.set_allocated_timeoflog(&spec);
-            logMessage.set_category(DataModel::LogMessage_Category_INFO);
-            logMessage.set_allocated_message(&message);
+	sub.subscribe(channelSubscriptions.begin(), channelSubscriptions.end());
 
-            publish(redis, logMessage);
-            
-            while (true)
-            {
-                try
-                {
-                    sub.consume();
-                }
-                catch (const sw::redis::Error& err)
-                {
-                    std::cout << "Consumer exception occurred! " << std::endl;
-                }
-            }
-        }
-        catch (...)
-        {
-            std::cout << ".";
-        }
-    }
+	DataModel::LogMessage logMessage;
 
-    google::protobuf::ShutdownProtobufLibrary();
+	struct timespec ts;
+	timespec_get(&ts, TIME_UTC);
 
-    return 0;
+	auto spec = new DataModel::TimeSpec();
+	spec->set_tv_sec(ts.tv_sec);
+	spec->set_tv_nsec(ts.tv_nsec);
+
+	auto message = new std::string("New ExampleMicroservice is up: " + uuid);
+
+	logMessage.set_allocated_timeoflog(spec);
+	logMessage.set_category(DataModel::LogMessage_Category_INFO);
+	logMessage.set_allocated_message(message);
+
+	ExampleMicroservice::queueUpPublish(logMessage);
+
+	auto noException = true;
+	while (noException)
+	{
+		try
+		{
+			sub.consume();
+		}
+		catch (const sw::redis::ReplyError& err)
+		{
+			std::cout << err.what() << std::endl;
+		}
+		catch (const sw::redis::TimeoutError& err)
+		{
+			std::cout << err.what() << std::endl;
+		}
+		catch (const sw::redis::Error& err)
+		{
+			std::cout << err.what() << std::endl;
+			noException = false;
+		}
+	}
+}
+
+void runService(char* redisHost, const std::vector<std::string>& channelSubscriptions)
+{
+	std::string uuid = newUUID();
+	std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
+	std::cout << "Attempting to connect to " << redisHost << std::endl;
+
+	while (true)
+	{
+		redisMutex.lock();
+		try
+		{
+			redis = new sw::redis::Redis(redisHost);
+		}
+		catch (...)
+		{
+			if (redis != nullptr)
+			{
+				delete redis;
+				redis = nullptr;
+			}
+			std::cout << ".";
+		}
+		redisMutex.unlock();
+
+		try
+		{
+			if (redis != nullptr)
+			{
+				runSubscriber(redis, channelSubscriptions, uuid);
+			}
+		}
+		catch (...)
+		{
+			if (redis != nullptr)
+			{
+				delete redis;
+				redis = nullptr;
+			}
+			std::cout << ".";
+		}
+
+		redisMutex.lock();
+		if (redis != nullptr)
+		{
+			delete redis;
+			redis = nullptr;
+		}
+		redisMutex.unlock();
+	}
 }
 
 int main(int argc, char* argv[])
 {
-    char redisHost[128];
-    memset(redisHost, '\0', 128);
-    strcat(redisHost, "tcp://");
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    std::vector<std::string> channelSubscriptions;
-    channelSubscriptions.push_back("Node Info");
-    channelSubscriptions.push_back("channel-1");
-    channelSubscriptions.push_back("channel-2");
+	char redisHost[128];
+	memset(redisHost, '\0', 128);
+	strcat_s(redisHost, "tcp://");
 
-    if (argc == 1)
-    {
-        strcat(redisHost, "localhost");
-    }
+	std::vector<std::string> channelSubscriptions;
+	channelSubscriptions.push_back("Node Info");
+	channelSubscriptions.push_back("channel-1");
+	channelSubscriptions.push_back("channel-2");
 
-    for (int i = 0; i < argc; ++i) 
-    {
-        if (i == 1 && strlen(argv[i]) < 128)
-        {
-            strcat(redisHost, argv[i]);
-        }
-        else if (i > 1)
-        {
-            channelSubscriptions.push_back(argv[i]);
-        }
-    }
+	if (argc == 1)
+	{
+		strcat_s(redisHost, "localhost");
+	}
 
-    strcat(redisHost, ":6379");
+	for (int i = 0; i < argc; ++i)
+	{
+		if (i == 1 && strlen(argv[i]) < 128)
+		{
+			strcat_s(redisHost, argv[i]);
+		}
+		else if (i > 1)
+		{
+			// TODO - Figure out how to introspectively obtain the current data model objects   
+			channelSubscriptions.push_back(argv[i]);
+		}
+	}
 
-    return runService( redisHost, channelSubscriptions );
+	strcat_s(redisHost, ":6379");
+
+	std::thread subscribeThread(ProcessSubscribeQueueTask);
+	std::thread publishThread(ProcessPublishQueueTask);
+
+	try
+	{
+		runService(redisHost, channelSubscriptions);
+	}
+	catch (const std::system_error& exception)
+	{
+		std::cout << exception.what() << std::endl;
+	}
+
+	continueProcessing = false;
+
+	publishThread.join();
+	subscribeThread.join();
+
+	google::protobuf::ShutdownProtobufLibrary();
 }
