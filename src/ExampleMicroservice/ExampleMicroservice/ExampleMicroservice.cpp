@@ -2,6 +2,7 @@
 #include <sw/redis++/redis++.h>
 #include <time.h>
 #include <thread>
+#include <chrono>
 
 #include "Libs.h"
 #include "uuid.h"
@@ -26,8 +27,8 @@ std::string msgTypeToString(const sw::redis::Subscriber::MsgType& type)
 SafeQueue<PubSubMessage> publishQueue;
 SafeQueue<PubSubMessage> subscribeQueue;
 
-std::mutex redisMutex;
-sw::redis::Redis* redis = nullptr;
+std::string g_redisHost = "";
+
 bool continueProcessing = true;;
 
 void ExampleMicroservice::queueUpPublish(const google::protobuf::Message& message)
@@ -37,16 +38,19 @@ void ExampleMicroservice::queueUpPublish(const google::protobuf::Message& messag
 
 void ProcessPublishQueueTask()
 {
+	auto redis = sw::redis::Redis(g_redisHost);
+
 	while (continueProcessing)
 	{
 		auto pubMessage = publishQueue.dequeue();
-
-		redisMutex.lock();
-		if (redis != nullptr)
+		try
 		{
-			redis->publish(pubMessage.fullName, pubMessage.serializedData);
+			redis.publish(pubMessage.fullName, pubMessage.serializedData);
 		}
-		redisMutex.unlock();
+		catch (...)
+		{
+			std::cout << "Dropping message: " << pubMessage.fullName << std::endl;
+		}
 	}
 }
 
@@ -67,23 +71,35 @@ void ProcessSubscribeQueueTask()
 	}
 }
 
-void runSubscriber(sw::redis::Redis* redis, const std::vector<std::string>& channelSubscriptions, const std::string& uuid)
+void PublishDummyMessageTask()
 {
-	auto redisExists = false;
-
-	redisMutex.lock();
-	if (redis != nullptr)
+	while (continueProcessing)
 	{
-		redisExists = true;
-	}
-	redisMutex.unlock();
+		DataModel::LogMessage logMessage;
 
-	if (!redisExists)
-	{
-		return;
-	}
+		struct timespec ts;
+		auto retVal = timespec_get(&ts, TIME_UTC);
 
-	auto sub = redis->subscriber();
+		auto spec = new DataModel::TimeSpec();
+		spec->set_tv_sec(ts.tv_sec);
+		spec->set_tv_nsec(ts.tv_nsec);
+
+		auto message = new std::string("Spam" + newUUID());
+
+		logMessage.set_allocated_timeoflog(spec);
+		logMessage.set_category(DataModel::LogMessage_Category_INFO);
+		logMessage.set_allocated_message(message);
+
+		ExampleMicroservice::queueUpPublish(logMessage);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
+}
+
+void runSubscriber(const std::vector<std::string>& channelSubscriptions, const std::string& uuid)
+{
+	auto redis = sw::redis::Redis(g_redisHost);
+	auto sub = redis.subscriber();
 
 	std::cout << std::endl << "Connected!" << std::endl;
 
@@ -102,7 +118,7 @@ void runSubscriber(sw::redis::Redis* redis, const std::vector<std::string>& chan
 	DataModel::LogMessage logMessage;
 
 	struct timespec ts;
-	timespec_get(&ts, TIME_UTC);
+	auto retVal = timespec_get(&ts, TIME_UTC);
 
 	auto spec = new DataModel::TimeSpec();
 	spec->set_tv_sec(ts.tv_sec);
@@ -139,54 +155,22 @@ void runSubscriber(sw::redis::Redis* redis, const std::vector<std::string>& chan
 	}
 }
 
-void runService(char* redisHost, const std::vector<std::string>& channelSubscriptions)
+void runService(const std::vector<std::string>& channelSubscriptions)
 {
 	std::string uuid = newUUID();
 	std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
-	std::cout << "Attempting to connect to " << redisHost << std::endl;
+	std::cout << "Attempting to connect to " << g_redisHost << std::endl;
 
 	while (true)
 	{
-		redisMutex.lock();
 		try
-		{
-			redis = new sw::redis::Redis(redisHost);
+		{		
+			runSubscriber(channelSubscriptions, uuid);
 		}
 		catch (...)
 		{
-			if (redis != nullptr)
-			{
-				delete redis;
-				redis = nullptr;
-			}
 			std::cout << ".";
 		}
-		redisMutex.unlock();
-
-		try
-		{
-			if (redis != nullptr)
-			{
-				runSubscriber(redis, channelSubscriptions, uuid);
-			}
-		}
-		catch (...)
-		{
-			if (redis != nullptr)
-			{
-				delete redis;
-				redis = nullptr;
-			}
-			std::cout << ".";
-		}
-
-		redisMutex.lock();
-		if (redis != nullptr)
-		{
-			delete redis;
-			redis = nullptr;
-		}
-		redisMutex.unlock();
 	}
 }
 
@@ -223,12 +207,15 @@ int main(int argc, char* argv[])
 
 	strcat_s(redisHost, ":6379");
 
+	g_redisHost = redisHost;
+
 	std::thread subscribeThread(ProcessSubscribeQueueTask);
 	std::thread publishThread(ProcessPublishQueueTask);
+	std::thread dummyThread(PublishDummyMessageTask);
 
 	try
 	{
-		runService(redisHost, channelSubscriptions);
+		runService(channelSubscriptions);
 	}
 	catch (const std::system_error& exception)
 	{
@@ -237,6 +224,7 @@ int main(int argc, char* argv[])
 
 	continueProcessing = false;
 
+	dummyThread.join();
 	publishThread.join();
 	subscribeThread.join();
 
