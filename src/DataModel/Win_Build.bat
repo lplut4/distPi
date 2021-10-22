@@ -14,11 +14,20 @@ if not exist "out\python" ( mkdir out\python || set error=1 )
 
 cd Protos
 
+set csharpOutDirectory=..\out\csharp
+
 set protoc=..\..\Dependencies\protobuf\cmake\build\Release\protoc.exe
+set protocOptions=--cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --python_out=..\out\python
 
-set protocOptions=--cpp_out=..\out\cpp --csharp_out=..\out\csharp --python_out=..\out\python
+set list=TimeSpec.proto
+set list=%list% LogMessage.proto
 
-%protoc% %protocOptions% TimeSpec.proto LogMessage.proto || set error=1
+%protoc% %protocOptions% %list% || set error=1
+
+set generateCsProj=..\GenerateCsProj\bin\Debug\GenerateCsProj.exe
+set preprotoFile=..\..\RedisInterface\DataModel\DataModel.csproj.preProto
+
+%generateCsProj% %preprotoFile% %csharpOutDirectory% %list%
 
 cd ..
 
