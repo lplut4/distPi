@@ -21,10 +21,11 @@ set protocOptions=--cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --pytho
 
 set list=TimeSpec.proto
 set list=%list% LogMessage.proto
+set list=%list% SuperSPeasdada\TestB.proto
 
 %protoc% %protocOptions% %list% || set error=1
 
-set generateCsProj=..\GenerateCsProj\bin\Debug\GenerateCsProj.exe
+set generateCsProj=..\GenerateCsProj\bin\Release\GenerateCsProj.exe
 set preprotoFile=..\..\RedisInterface\DataModel\DataModel.csproj.preProto
 
 %generateCsProj% %preprotoFile% %csharpOutDirectory% %list%

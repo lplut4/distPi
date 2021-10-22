@@ -59,7 +59,9 @@ namespace GenerateCsProj
                     var indent = line.Replace(SEARCH_KEYWORD, "");
                     foreach ( var proto in protos )
                     {
-                        var newTag = indent + TAG_START + relativePathFromProjectFileToOutput + proto.Replace(".proto", ".cs") + TAG_END;
+                        var csProtofile = proto.Replace(".proto", ".cs");
+                        var csProtofileName = csProtofile.Contains("\\") ? csProtofile.Substring(csProtofile.LastIndexOf("\\") + 1) : csProtofile; 
+                        var newTag = indent + TAG_START + relativePathFromProjectFileToOutput + csProtofileName + TAG_END;
                         newFile.Add( newTag );
                     }
                 }

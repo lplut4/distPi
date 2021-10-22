@@ -56,6 +56,7 @@ echo Build Release...
 echo ###########################
 echo # Building GenerateCsProj #
 echo ###########################
+cd %rootDir%\DataModel\GenerateCsProj
 echo Building Release...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 GenerateCsProj.sln || set error=1
 
