@@ -53,6 +53,12 @@ echo Nuget Package Restore...
 echo Build Release...
 %msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 StackExchange.Redis.sln || set error=1
 
+echo ###########################
+echo # Building GenerateCsProj #
+echo ###########################
+echo Building Release...
+%msbuild% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 GenerateCsProj.sln || set error=1
+
 echo #####################
 echo # Building protobuf #
 echo #####################

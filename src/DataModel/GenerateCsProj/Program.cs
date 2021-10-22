@@ -50,7 +50,7 @@ namespace GenerateCsProj
             var newFile = new List<string>();
 
             var newFileAbsolutePath = System.IO.Path.GetFullPath(newFileName);
-            System.Console.WriteLine("Appending " + protos.Count + " compiled protobuf file(s) to " + newFileAbsolutePath);
+            System.Console.WriteLine("Generated project from " + protos.Count + " protobuf file(s): " + newFileAbsolutePath);
 
             foreach( var line in originalFile )
             {
@@ -59,9 +59,7 @@ namespace GenerateCsProj
                     var indent = line.Replace(SEARCH_KEYWORD, "");
                     foreach ( var proto in protos )
                     {
-                        System.Console.WriteLine(proto);
                         var newTag = indent + TAG_START + relativePathFromProjectFileToOutput + proto.Replace(".proto", ".cs") + TAG_END;
-                        System.Console.WriteLine(newTag);
                         newFile.Add( newTag );
                     }
                 }
