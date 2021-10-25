@@ -77,17 +77,22 @@ cmake %cmakeArgs% .. || set errorBuild=1
 echo Building protobuf...
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 protobuf.sln || set errorBuild=1
 
-echo #####################
+echo #######################
 echo # Building protobuf-c #
-echo #####################
-cd %rootDir%\Dependencies\protobuf-c\build-cmake\
+echo #######################
+cd %rootDir%\Dependencies\protobuf-c\
+if not exist google\protobuf ( mkdir google\protobuf )
+copy %rootDir%\Dependencies\protobuf\src\google\protobuf\descriptor.proto %rootDir%\Dependencies\protobuf-c\google\protobuf\
+cd build-cmake\
 mkdir build
 cd build
 echo Running CMake...
-set cmakeArgs=-DProtobuf_LIBRARIES=..\..\..\protobuf\cmake\build\Release -DProtobuf_INCLUDE_DIR=..\..\..\protobuf\src -DProtobuf_PROTOC_LIBRARY=libprotoc.lib -DPROTOBUF_PROTOC_EXECUTABLE=protoc.exe -DCMAKE_BINARY_DIR=..\..\..\protobuf\cmake\build\Release
+set cmakeArgs=-DPROTOBUF_PROTOC_EXECUTABLE=..\..\..\protobuf\cmake\build\Release\protoc.exe -DCMAKE_BINARY_DIR=..\..\..\protobuf\cmake\build\Release -DProtobuf_LIBRARIES=..\..\..\protobuf\cmake\build\Release -DProtobuf_INCLUDE_DIR=..\..\..\protobuf\src -DPROTOBUF_LIBRARY=..\..\..\protobuf\cmake\build\Release\libprotobuf.lib -DPROTOBUF_PROTOC_LIBRARY=..\..\..\protobuf\cmake\build\Release\libprotoc.lib
 cmake %cmakeArgs% .. || set errorBuild=1
+copy /Y %rootDir%\Patches\protobuf-c\build-cmake\build\protoc-gen-c.vcxproj %rootDir%\Dependencies\protobuf-c\build-cmake\build
 echo Building protobuf...
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 protobuf-c.sln || set errorBuild=1
+copy %rootDir%\Dependencies\protobuf-c\build-cmake\build\Release\protoc-gen-c.exe %rootDir%\DataModel\Protos
 
 echo ################################
 echo # Building C# Protobuf Runtime #
