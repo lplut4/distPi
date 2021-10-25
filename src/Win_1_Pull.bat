@@ -73,6 +73,16 @@ if not exist "Dependencies\Protobuf" (
 	echo Protobuf already exists
 )
 
+echo ######################
+echo # Pulling Protobuf-c #
+echo ######################
+if not exist "Dependencies\Protobuf-c" (
+	cd Dependencies || set error=1
+	git clone -b v1.4.0 https://github.com/protobuf-c/protobuf-c.git || set error=1
+) else (
+	echo Protobuf-c already exists
+)
+
 if exist Dependencies\_Downloads ( rmdir /S /Q Dependencies\_Downloads )
 
 if "%error%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
