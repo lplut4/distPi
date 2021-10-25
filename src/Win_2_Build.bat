@@ -18,11 +18,11 @@ set rootDir=%cd%
 
 call %VS_SETUP_DEV%
 
-echo #####################
-echo # Building WinRedis #
-echo #####################
-cd %rootDir%\Dependencies\WinRedis\msvs
-echo Building WinRedis...
+echo ##############################
+echo # Building Redis for Windows #
+echo ##############################
+cd %rootDir%\Dependencies\microsoftarchive\redis\msvs
+echo Building Redis...
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 RedisServer.sln || set errorBuild=1
 
 echo ####################
@@ -93,8 +93,8 @@ echo ################################
 echo # Building C# Protobuf Runtime #
 echo ################################
 cd %rootDir%\Dependencies\protobuf\csharp\src
-REM echo Nuget Package Restore...
-REM %MS_BUILD% /m /t:restore /verbosity:quiet /noLogo Google.Protobuf.sln || set errorBuild=1
+echo Nuget Package Restore...
+%MS_BUILD% /m /t:restore /verbosity:quiet /noLogo Google.Protobuf.sln || set errorBuild=1
 echo Build Release...
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 Google.Protobuf.sln || set errorBuild=1
 
