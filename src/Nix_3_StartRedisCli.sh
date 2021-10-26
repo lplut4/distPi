@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Dependencies/Redis/src/redis-cli
+Dependencies/redis/src/redis-cli

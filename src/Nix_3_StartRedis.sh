@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Dependencies/Redis/src/redis-server Config/RedisConfig.conf &
+Dependencies/redis/src/redis-server Config/RedisConfig_Linux.conf &
