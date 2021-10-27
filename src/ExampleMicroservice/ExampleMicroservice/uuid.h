@@ -6,7 +6,7 @@ extern "C"
 #include <Rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
 #else
-#include <uuid/uuid.h>
+//#include <uuid/uuid.h>
 #endif
 }
 #include <string>
@@ -24,10 +24,10 @@ std::string newUUID()
 
         RpcStringFreeA(&str);
     #else
-        uuid_t uuid;
-        uuid_generate_random(uuid);
+  //      uuid_t uuid;
+    //    uuid_generate_random(uuid);
         char s[37];
-        uuid_unparse(uuid, s);
+      //  uuid_unparse(uuid, s);
     #endif
         return s;
 }

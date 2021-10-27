@@ -50,11 +50,16 @@ if [ ! -d "google/protobuf" ]; then
 fi
 cp ../protobuf/src/google/protobuf/descriptor.proto google/protobuf/
 cd build-cmake/
-mkdir build
+if [ ! -d "build" ]; then 
+	mkdir build
+fi
 cd build
 set cmakeArgs=-DPROTOBUF_PROTOC_EXECUTABLE=../../../protobuf/src/protoc -DCMAKE_BINARY_DIR=../../../protobuf/src/ -DProtobuf_LIBRARIES=../../../protobuf/src/ -DProtobuf_INCLUDE_DIR=../../../protobuf/src/ -DPROTOBUF_LIBRARY=../../../protobuf/src/libprotobuf.la -DPROTOBUF_PROTOC_LIBRARY=../../../protobuf/src/libprotoc.la
 cmake $cmakeArgs ..
 make
+
+cp protoc-gen-c ../../../../DataModel/Protos
+
 cd ../../..
 
 cd ..
