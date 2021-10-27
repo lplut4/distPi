@@ -25,12 +25,12 @@ set csharpOutDirectory=..\out\csharp
 set protoc=..\..\Dependencies\protobuf\cmake\build\Release\protoc.exe
 set protocOptions=--cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --python_out=..\out\python --c_out=..\out\c
 
-set protoc-gen-c=..\..\Dependencies\protobuf-c\build-cmake\build\Release\protoc-gen-c.exe
+set protoc_c_plugin=--plugin=protoc-gen-c=..\..\Dependencies\protobuf-c\build-cmake\build\Release\protoc-gen-c.exe
 
 set list=TimeSpec.proto
 set list=%list% LogMessage.proto
 
-%protoc% %protocOptions% %list% || set errorBuildProtos=1
+%protoc% %protoc_c_plugin% %protocOptions% %list% || set errorBuildProtos=1
 
 set generateCsProj=..\GenerateCsProj\bin\Release\GenerateCsProj.exe
 set preprotoFile=..\..\RedisInterface\DataModel\DataModel.csproj.preProto

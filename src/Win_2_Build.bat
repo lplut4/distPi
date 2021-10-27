@@ -73,8 +73,6 @@ set cmakeArgs=-DPROTOBUF_PROTOC_EXECUTABLE=..\..\..\protobuf\cmake\build\Release
 cmake %cmakeArgs% .. || set errorBuild=1
 copy /Y %rootDir%\Patches\protobuf-c\build-cmake\build\protoc-gen-c.vcxproj %rootDir%\Dependencies\protobuf-c\build-cmake\build
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 protobuf-c.sln || set errorBuild=1
-copy %rootDir%\Dependencies\protobuf-c\build-cmake\build\Release\protoc-gen-c.exe %rootDir%\DataModel\Protos
-
 
 echo Building C# Protobuf Runtime...
 cd %rootDir%\Dependencies\protobuf\csharp\src
