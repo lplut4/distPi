@@ -10,8 +10,8 @@
 #include "PubSubMessage.h"
 #include "ExampleMicroservice.h"
 
-#include "../../DataModel/out/cpp/LogMessage.pb.h"
-#include "../../DataModel/out/cpp/TimeSpec.pb.h"
+#include "LogMessage.pb.h"
+#include "TimeSpec.pb.h"
 
 std::string msgTypeToString(const sw::redis::Subscriber::MsgType& type)
 {
