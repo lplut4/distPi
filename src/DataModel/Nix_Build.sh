@@ -26,7 +26,7 @@ cd Protos
 
 protoc="../../Dependencies/protobuf/src/protoc"
 protoc_c_plugin="--plugin=protoc-gen-c=../../Dependencies/protobuf-c/protoc-c/protoc-gen-c"
-protocOptions="--cpp_out=../out/cpp --csharp_out=../out/csharp --python_out=../out/python --c_out=../out/c"
+protocOptions="--cpp_out=../out/cpp --csharp_out=../out/csharp --python_out=../out/python"
 
 list="TimeSpec.proto LogMessage.proto"
 

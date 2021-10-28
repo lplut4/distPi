@@ -1,3 +1,6 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <sw/redis++/redis++.h>
 #include <time.h>
@@ -180,7 +183,7 @@ int main(int argc, char* argv[])
 
 	char redisHost[128];
 	memset(redisHost, '\0', 128);
-	strcat_s(redisHost, "tcp://");
+	strcat(redisHost, "tcp://");
 
 	std::vector<std::string> channelSubscriptions;
 	channelSubscriptions.push_back("Node Info");
@@ -189,14 +192,14 @@ int main(int argc, char* argv[])
 
 	if (argc == 1)
 	{
-		strcat_s(redisHost, "localhost");
+		strcat(redisHost, "localhost");
 	}
 
 	for (int i = 0; i < argc; ++i)
 	{
 		if (i == 1 && strlen(argv[i]) < 128)
 		{
-			strcat_s(redisHost, argv[i]);
+			strcat(redisHost, argv[i]);
 		}
 		else if (i > 1)
 		{
@@ -205,7 +208,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	strcat_s(redisHost, ":6379");
+	strcat(redisHost, ":6379");
 
 	g_redisHost = redisHost;
 
