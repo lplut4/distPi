@@ -59,7 +59,7 @@ cp ../protobuf/src/google/protobuf/descriptor.proto google/protobuf/
 ./autogen.sh
 ./configure
 make
-cd ../../..
+cd ..
 
 cd ..
 
@@ -68,3 +68,4 @@ cd ExampleMicroservice
 mkdir build
 cd build
 cmake ..
+make
