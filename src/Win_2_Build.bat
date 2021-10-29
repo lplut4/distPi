@@ -92,7 +92,11 @@ cd %rootDir%\RedisInterface
 
 echo Building ExampleMicroservice...
 cd %rootDir%\ExampleMicroservice
+mkdir build
+cd build
+cmake ..
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo ExampleMicroservice.sln || set errorBuild=1
+
 
 :end
 if "%errorBuild%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
