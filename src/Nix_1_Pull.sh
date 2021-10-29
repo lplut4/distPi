@@ -28,7 +28,7 @@ if [ ! -d "microsoftarchive" ]; then
 	git apply ../../../Patches/microsoftarchive/redis/0001-Patch-to-allow-builds-in-VS2019.patch
 	cd ../..
 else
-	echo "redis-plus-plus already exists"
+	echo "Redis for Windows already exists"
 fi
 	
 if [ ! -d "redis-plus-plus" ]; then
