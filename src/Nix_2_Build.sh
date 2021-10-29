@@ -39,28 +39,6 @@ make
 # make check
 cd ..
 
-
-echo Building Protobuf-c...
-cd protobuf-c
-if [ ! -d "google/protobuf" ]; then
-	mkdir google
-	cd google
-	mkdir protobuf
-	cd ..
-fi
-cp ../protobuf/src/google/protobuf/descriptor.proto google/protobuf/
-#cd build-cmake/
-#if [ ! -d "build" ]; then 
-#	mkdir build
-#fi
-#cd build
-#set cmakeArgs=-DPROTOBUF_PROTOC_EXECUTABLE=../../../protobuf/src/protoc -DCMAKE_BINARY_DIR=../../../protobuf/src/ -DProtobuf_LIBRARIES=../../../protobuf/src/ -DProtobuf_INCLUDE_DIR=../../../protobuf/src/ -DPROTOBUF_LIBRARY=../../../protobuf/src/libprotobuf.la -DPROTOBUF_PROTOC_LIBRARY=../../../protobuf/src/libprotoc.la
-#cmake $cmakeArgs ..
-./autogen.sh
-./configure
-make
-cd ..
-
 cd ..
 
 echo Building ExampleMicroservice...

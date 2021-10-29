@@ -13,7 +13,6 @@ echo #################################
 
 set errorBuildProtos=0
 
-if not exist "out\c"      ( mkdir out\c      || set errorBuildProtos=1 )
 if not exist "out\cpp"    ( mkdir out\cpp    || set errorBuildProtos=1 )
 if not exist "out\csharp" ( mkdir out\csharp || set errorBuildProtos=1 )	
 if not exist "out\python" ( mkdir out\python || set errorBuildProtos=1 )
@@ -23,14 +22,12 @@ cd Protos
 set csharpOutDirectory=..\out\csharp
 
 set protoc=..\..\Dependencies\protobuf\cmake\build\Release\protoc.exe
-set protocOptions=--cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --python_out=..\out\python --c_out=..\out\c
-
-set protoc_c_plugin=--plugin=protoc-gen-c=..\..\Dependencies\protobuf-c\build-cmake\build\Release\protoc-gen-c.exe
+set protocOptions=--cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --python_out=..\out\python
 
 set list=TimeSpec.proto
 set list=%list% LogMessage.proto
 
-%protoc% %protoc_c_plugin% %protocOptions% %list% || set errorBuildProtos=1
+%protoc% %protocOptions% %list% || set errorBuildProtos=1
 
 set generateCsProj=..\GenerateCsProj\bin\Release\GenerateCsProj.exe
 set preprotoFile=..\..\RedisInterface\DataModel\DataModel.csproj.preProto

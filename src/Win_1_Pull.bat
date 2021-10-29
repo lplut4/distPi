@@ -62,14 +62,6 @@ if not exist "protobuf" (
 )
 cd %depDir%
 
-if not exist "protobuf-c" (
-	echo Pulling protobuf-c...
-	git clone %gitConfig% -b v1.4.0 https://github.com/protobuf-c/protobuf-c.git || set error=1
-) else (
-	echo protobuf-c already exists
-)
-cd %depDir%
-
 cd %rootDir%
 
 if "%error%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )

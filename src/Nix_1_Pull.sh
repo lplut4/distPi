@@ -56,11 +56,4 @@ else
 	echo "protobuf already exists"
 fi
 
-if [ ! -d "protobuf-c" ]; then
-	echo "Pulling protobuf-c..."
-	git clone $gitConfig -b v1.4.0 https://github.com/protobuf-c/protobuf-c.git
-else
-	echo "protobuf-c already exists"
-fi
-
 cd ..
