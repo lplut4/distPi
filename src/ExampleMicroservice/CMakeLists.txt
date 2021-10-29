@@ -13,21 +13,27 @@ if (UNIX)
 	include_directories(/usr/local/include)
 endif (UNIX)
 
-add_library(mylib OBJECT ../DataModel/out/cpp/TimeSpec.pb.cc ../DataModel/out/cpp/LogMessage.pb.cc)
+add_library(DataModel OBJECT ../DataModel/out/cpp/TimeSpec.pb.cc ../DataModel/out/cpp/LogMessage.pb.cc)
 add_executable(ExampleMicroservice ExampleMicroservice/ExampleMicroservice.cpp)
+
+target_link_libraries(ExampleMicroservice PUBLIC DataModel)
 
 if (UNIX)
 	target_link_libraries(ExampleMicroservice PUBLIC pthread)
 	target_link_libraries(ExampleMicroservice PUBLIC atomic)
-	target_link_libraries(ExampleMicroservice PUBLIC mylib)
 	target_link_libraries(ExampleMicroservice PUBLIC uuid)
+	
+	find_library(PROTOBUF_LIBRARY libprotobuf.a HINTS ../Dependencies/protobuf/src/.libs/)
+	find_library(LIB_REDIS_PP libredis++.a HINTS ../Dependencies/redis-plus-plus/build/)
+	find_library(LIB_HIREDIS libhiredis.a HINTS ../Dependencies/redis/deps/hiredis/)
 endif (UNIX)
 
-find_library(PROTOBUF_LIBRARY libprotobuf.a HINTS ../Dependencies/protobuf/src/.libs/)
+if (MSVC)
+	find_library(PROTOBUF_LIBRARY libprotobuf.lib HINTS ../Dependencies/protobuf/cmake/build/Release/)
+	find_library(LIB_REDIS_PP redis++_static.lib HINTS ../Dependencies/redis-plus-plus/build/Release/)
+	find_library(LIB_HIREDIS hiredis.lib HINTS ../Dependencies/redis/deps/hiredis/build/Release/)
+endif(MSVC)
+
 target_link_libraries(ExampleMicroservice PUBLIC ${PROTOBUF_LIBRARY})
-
-find_library(LIB_REDIS_PP libredis++.a HINTS ../Dependencies/redis-plus-plus/build/)
 target_link_libraries(ExampleMicroservice PUBLIC ${LIB_REDIS_PP})
-
-find_library(LIB_HIREDIS libhiredis.a HINTS ../Dependencies/redis/deps/hiredis/)
 target_link_libraries(ExampleMicroservice PUBLIC ${LIB_HIREDIS})
