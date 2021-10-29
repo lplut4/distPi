@@ -31,7 +31,6 @@ cd build
 cmake -Wno-dev .. || set errorBuild=1
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 hiredis.sln || set errorBuild=1
 
-
 echo Building redis-plus-plus...
 cd %rootDir%\Dependencies\redis-plus-plus
 mkdir build
@@ -41,17 +40,14 @@ set cmakeArgs=-DHIREDIS_HEADER=%rootDir%\Dependencies\Redis\deps  -DHIREDIS_LIB=
 cmake %cmakeArgs% .. || set errorBuild=1
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 redis++.sln || set errorBuild=1
 
-
 echo Building StackExchange.Redis...
 cd %rootDir%\Dependencies\StackExchange.Redis\
 %MS_BUILD% /m /t:restore /verbosity:quiet /noLogo StackExchange.Redis.sln || set errorBuild=1
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 StackExchange.Redis.sln || set errorBuild=1
 
-
 echo Building GenerateCsProj...
 cd %rootDir%\DataModel\GenerateCsProj
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 GenerateCsProj.sln || set errorBuild=1
-
 
 echo Building protobuf...
 cd %rootDir%\Dependencies\protobuf\cmake\
@@ -60,7 +56,6 @@ cd build
 set cmakeArgs=-G "Visual Studio 16 2019" -DCMAKE_INSTALL_PREFIX=install -Dprotobuf_MSVC_STATIC_RUNTIME=OFF
 cmake %cmakeArgs% .. || set errorBuild=1
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 protobuf.sln || set errorBuild=1
-
 
 echo Building protobuf-c...
 cd %rootDir%\Dependencies\protobuf-c\
@@ -79,16 +74,13 @@ cd %rootDir%\Dependencies\protobuf\csharp\src
 %MS_BUILD% /m /t:restore /verbosity:quiet /noLogo Google.Protobuf.sln || set errorBuild=1
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 Google.Protobuf.sln || set errorBuild=1
 
-
 echo Building Protobuf DataModel...
 cd %rootDir%\DataModel
 call Win_Build.bat || set errorBuild=1
 
-
 echo Building RedisInterface...
 cd %rootDir%\RedisInterface
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo RedisInterface.sln || set errorBuild=1
-
 
 echo Building ExampleMicroservice...
 cd %rootDir%\ExampleMicroservice
@@ -96,7 +88,7 @@ mkdir build
 cd build
 cmake ..
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo ExampleMicroservice.sln || set errorBuild=1
-
+copy %rootDir%\Dependencies\redis\deps\hiredis\build\release\hiredis.dll Release
 
 :end
 if "%errorBuild%" == "1" ( echo # ERRORS OCCURRED ) else ( echo # SUCCESS! )
