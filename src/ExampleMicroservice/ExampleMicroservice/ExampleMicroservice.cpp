@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sw/redis++/redis++.h>
+#include <memory>
 #include <time.h>
 #include <thread>
 #include <chrono>
@@ -12,9 +13,10 @@
 #include "SafeQueue.h"
 #include "PubSubMessage.h"
 #include "ExampleMicroservice.h"
+#include "MessageSubscriber.h"
+#include "Logger.h"
 
-#include "LogMessage.pb.h"
-#include "TimeSpec.pb.h"
+#include "ExampleAgent.h"
 
 std::string msgTypeToString(const sw::redis::Subscriber::MsgType& type)
 {
@@ -32,7 +34,7 @@ SafeQueue<PubSubMessage> subscribeQueue;
 
 std::string g_redisHost = "";
 
-bool continueProcessing = true;;
+bool continueProcessing = true;
 
 void ExampleMicroservice::queueUpPublish(const google::protobuf::Message& message)
 {
@@ -57,6 +59,19 @@ void ProcessPublishQueueTask()
 	}
 }
 
+std::map<std::string, std::vector<IMessageSubscriber*>> subscribersPerChannel;
+
+void ExampleMicroservice::registerSubscriber(std::string channel, IMessageSubscriber* sub)
+{
+	if (subscribersPerChannel.find(channel) == subscribersPerChannel.end())
+	{
+		std::vector<IMessageSubscriber*> subscribers;
+		subscribersPerChannel.emplace(channel, subscribers);
+	}
+
+	subscribersPerChannel[channel].push_back(sub);
+}
+
 void queueUpSubscribe(const std::string& channel, const std::string& msg)
 {
 	subscribeQueue.enqueue(PubSubMessage(channel, msg));
@@ -67,10 +82,24 @@ void ProcessSubscribeQueueTask()
 	while (continueProcessing)
 	{
 		auto subMessage = subscribeQueue.dequeue();
+		auto data       = subMessage.serializedData;
+		auto name       = subMessage.fullName;
 
-		// TODO - Figure out how to distribute these messages to the various internal "subscribers"
-
-		std::cout << "Received message: " << subMessage.serializedData << " on " << subMessage.fullName << std::endl;
+		if (subscribersPerChannel.find(name) != subscribersPerChannel.end())
+		{
+			DeserializedMessage msg = nullptr;
+			bool deserialized = false;
+			for (auto subscriber : subscribersPerChannel[name])
+			{
+				if (!deserialized)
+				{
+					msg = subscriber->processSubscription(data);
+					deserialized = true;
+					continue;
+				}
+				subscriber->processSubscription(msg);
+			}
+		}
 	}
 }
 
@@ -78,16 +107,19 @@ void PublishDummyMessageTask()
 {
 	while (continueProcessing)
 	{
+		Logger::logInfo("Spam: " + newUUID());
+
 		DataModel::LogMessage logMessage;
 
 		struct timespec ts;
+
 		auto retVal = timespec_get(&ts, TIME_UTC);
 
 		auto spec = new DataModel::TimeSpec();
 		spec->set_tv_sec(ts.tv_sec);
 		spec->set_tv_nsec(ts.tv_nsec);
 
-		auto message = new std::string("Spam" + newUUID());
+		auto message = new std::string("Spam: " + newUUID());
 
 		logMessage.set_allocated_timeoflog(spec);
 		logMessage.set_category(DataModel::LogMessage_Category_INFO);
@@ -99,7 +131,7 @@ void PublishDummyMessageTask()
 	}
 }
 
-void runSubscriber(const std::vector<std::string>& channelSubscriptions, const std::string& uuid)
+void runSubscriber(const std::map<std::string, std::vector<IMessageSubscriber*>>& channelSubscriptions, const std::string& uuid)
 {
 	auto redis = sw::redis::Redis(g_redisHost);
 	auto sub = redis.subscriber();
@@ -116,24 +148,14 @@ void runSubscriber(const std::vector<std::string>& channelSubscriptions, const s
 			std::cout << "Received " << msgTypeToString(type) << " on " << channel.value() << " number " << num << std::endl;
 		});
 
-	sub.subscribe(channelSubscriptions.begin(), channelSubscriptions.end());
+	std::vector<std::string> channels;
+	for (auto keyValuePair : channelSubscriptions)
+	{
+		channels.push_back(keyValuePair.first);
+	}
+	sub.subscribe(channels.begin(), channels.end());
 
-	DataModel::LogMessage logMessage;
-
-	struct timespec ts;
-	auto retVal = timespec_get(&ts, TIME_UTC);
-
-	auto spec = new DataModel::TimeSpec();
-	spec->set_tv_sec(ts.tv_sec);
-	spec->set_tv_nsec(ts.tv_nsec);
-
-	auto message = new std::string("New ExampleMicroservice is up: " + uuid);
-
-	logMessage.set_allocated_timeoflog(spec);
-	logMessage.set_category(DataModel::LogMessage_Category_INFO);
-	logMessage.set_allocated_message(message);
-
-	ExampleMicroservice::queueUpPublish(logMessage);
+	Logger::logInfo("New ExampleMicroservice is up: " + uuid);
 
 	auto noException = true;
 	while (noException)
@@ -158,7 +180,7 @@ void runSubscriber(const std::vector<std::string>& channelSubscriptions, const s
 	}
 }
 
-void runService(const std::vector<std::string>& channelSubscriptions)
+void runService(const std::map<std::string, std::vector<IMessageSubscriber*>>& channelSubscriptions)
 {
 	std::string uuid = newUUID();
 	std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
@@ -167,7 +189,7 @@ void runService(const std::vector<std::string>& channelSubscriptions)
 	while (true)
 	{
 		try
-		{		
+		{
 			runSubscriber(channelSubscriptions, uuid);
 		}
 		catch (...)
@@ -177,18 +199,13 @@ void runService(const std::vector<std::string>& channelSubscriptions)
 	}
 }
 
-int main(int argc, char* argv[])
+int ExampleMicroservice::startService(int argc, char* argv[])
 {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 	char redisHost[128];
 	memset(redisHost, '\0', 128);
 	strcat(redisHost, "tcp://");
-
-	std::vector<std::string> channelSubscriptions;
-	channelSubscriptions.push_back("Node Info");
-	channelSubscriptions.push_back("channel-1");
-	channelSubscriptions.push_back("channel-2");
 
 	if (argc == 1)
 	{
@@ -200,11 +217,6 @@ int main(int argc, char* argv[])
 		if (i == 1 && strlen(argv[i]) < 128)
 		{
 			strcat(redisHost, argv[i]);
-		}
-		else if (i > 1)
-		{
-			// TODO - Figure out how to introspectively obtain the current data model objects   
-			channelSubscriptions.push_back(argv[i]);
 		}
 	}
 
@@ -218,7 +230,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		runService(channelSubscriptions);
+		runService(subscribersPerChannel);
 	}
 	catch (const std::system_error& exception)
 	{
@@ -232,4 +244,19 @@ int main(int argc, char* argv[])
 	subscribeThread.join();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+	// Instantiate "Agents" here
+	ExampleAgent agent1;
+	ExampleAgent agent2;
+	ExampleAgent agent3;
+	ExampleAgent agent4;
+	ExampleAgent agent5;
+	ExampleAgent agent6;
+
+	ExampleMicroservice::startService(argc, argv);
 }
