@@ -8,12 +8,13 @@ project(ExampleMicroservice)
 	include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/no_tls)
 	include_directories(../Dependencies/protobuf/src)
 	include_directories(../DataModel/out/cpp)
+	include_directories(ExampleMicroservice)
 
 if (UNIX)
 	include_directories(/usr/local/include)
 endif (UNIX)
 
-add_library(DataModel OBJECT ../DataModel/out/cpp/TimeSpec.pb.cc ../DataModel/out/cpp/LogMessage.pb.cc)
+add_library(MicroserviceLib OBJECT ../DataModel/out/cpp/TimeSpec.pb.cc ../DataModel/out/cpp/LogMessage.pb.cc ExampleMicroservice/Microservice.cpp)
 add_executable(ExampleMicroservice ExampleMicroservice/ExampleMicroservice.cpp)
 
 target_link_libraries(ExampleMicroservice PUBLIC DataModel)
