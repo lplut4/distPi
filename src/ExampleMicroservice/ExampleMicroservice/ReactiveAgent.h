@@ -3,6 +3,7 @@
 #include <MicroserviceLib/MessageSubscriber.h>
 #include <MicroserviceLib/CallbackTimer.h>
 #include <MicroserviceLib/Publisher.h>
+#include <MicroserviceLib/Logger.h>
 
 #include "LogMessage.pb.h"
 
@@ -11,11 +12,6 @@ class ReactiveAgent
 public:
 	ReactiveAgent()
 	{
-		m_logSubscriber.onMessage([this](auto message)
-			{
-				message->PrintDebugString();
-			});
-
 		m_timeSubscriber.onMessage([this](auto message)
 			{
 				message->PrintDebugString();
@@ -25,6 +21,8 @@ public:
 			{
 				std::cout << "Tick!" << std::endl;
 			});
+
+		Logger::error("Not really");
 	};
 
 	~ReactiveAgent() {};
@@ -32,6 +30,5 @@ public:
 private:
 
 	CallbackTimer m_timer;
-	MessageSubscriber<DataModel::LogMessage> m_logSubscriber;
 	MessageSubscriber<DataModel::TimeSpec> m_timeSubscriber;
 };

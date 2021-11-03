@@ -1,26 +1,22 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <iostream>
-#include <sw/redis++/redis++.h>
-#include <memory>
-#include <time.h>
-#include <thread>
-#include <chrono>
-
-#include "uuid.h"
-#include "SafeQueue.h"
-#include "PubSubMessage.h"
+#include "Logger.h"
 #include "Microservice.h"
-#include "IMessageSubscriber.h"
+#include "Publisher.h"
+#include "Subscriber.h"
 
 #include <string>
 #include <time.h>
-#include "LogMessage.pb.h"
+#include <iostream>
+#include <sw/redis++/redis++.h>
+#include <thread>
 
-#include "Publisher.h"
-#include "Subscriber.h"
-#include "Logger.h"
+#include "IMessageSubscriber.h"
+#include "LogMessage.pb.h"
+#include "PubSubMessage.h"
+#include "SafeQueue.h"
+#include "uuid.h"
 
 namespace // private
 {
@@ -158,14 +154,7 @@ namespace // private
 		}
 	}
 	
-	enum Category
-	{
-		INFO_MSG,
-		WARNING_MSG,
-		ERROR_MSG
-	};
-
-	void logMessage(const std::string& prefix, const std::string& msg, const Category& category)
+	void logMessage(const std::string& prefix, const std::string& msg, const DataModel::LogMessage_Category& category)
 	{
 		DataModel::LogMessage logMessage;
 
@@ -180,29 +169,29 @@ namespace // private
 		auto message = new std::string(msg);
 
 		logMessage.set_allocated_timeoflog(spec);
-		logMessage.set_category(DataModel::LogMessage_Category_INFO);
+		logMessage.set_category(category);
 		logMessage.set_allocated_message(message);
 
-		std::cout << "INFO: " << msg << std::endl;
+		std::cout << prefix << msg << std::endl;
 
 		Publisher::addToQueue(logMessage);
 	}
 
 }  // end private
 
-void Logger::logError(const std::string& message) 
+void Logger::error(const std::string& message) 
 { 
-	logMessage("ERROR", message, Category::ERROR_MSG); 
+	logMessage("ERROR: ", message, DataModel::LogMessage_Category_ERROR);
 };
 
-void Logger::logWarning(const std::string& message) 
+void Logger::warning(const std::string& message) 
 { 
-	logMessage("WARNING", message, Category::WARNING_MSG); 
+	logMessage("WARNING: ", message, DataModel::LogMessage_Category_WARNING);
 };
 
-void Logger::logInfo(const std::string& message) 
+void Logger::info(const std::string& message) 
 { 
-	logMessage("INFO", message, Category::INFO_MSG); 
+	logMessage("INFO: ", message, DataModel::LogMessage_Category_INFO);
 };
 
 void Publisher::addToQueue(const google::protobuf::Message& message)
