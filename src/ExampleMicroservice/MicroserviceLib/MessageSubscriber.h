@@ -18,7 +18,7 @@ class MessageSubscriber : public IMessageSubscriber
 
 public:
 
-	MessageSubscriber()
+	MessageSubscriber() noexcept
 	{
 		m_consumeThread = std::thread{ &MessageSubscriber::ConsumeThreadMain, this };
 	};
@@ -32,13 +32,14 @@ public:
 		m_subscribeCallback = subCallback;
 		DeserializedMessage message = std::make_shared<T>();
 		Subscriber::registerSubscriber(message->GetTypeName(), this);
+		message.reset();
 	}
 
 	// Deserialize the message, and pass it on to the subscriber
-	virtual DeserializedMessage processSubscription(std::string encodedMsg)
+	DeserializedMessage processSubscription(std::string encodedMsg) override
 	{
 		DeserializedMessage msg = std::make_shared<T>();
-		auto success = msg->ParseFromString(encodedMsg);
+		const auto success = msg->ParseFromString(encodedMsg);
 		if (!success)
 		{
 			Logger::error(__FILELINE__, "Could not deserialize: " + msg->GetTypeName());
@@ -48,7 +49,7 @@ public:
 	}
 
 	// The Message has already been deserialized, but we want to pass it to a subscriber
-	virtual void processSubscription(DeserializedMessage msg)
+	void processSubscription(DeserializedMessage msg) override
 	{
 		m_messageQueue.enqueue(std::dynamic_pointer_cast<T>(msg));
 	}

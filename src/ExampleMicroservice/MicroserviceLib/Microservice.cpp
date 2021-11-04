@@ -48,7 +48,7 @@ namespace // private
 			{
 				redis.publish(pubMessage.fullName, pubMessage.serializedData);
 			}
-			catch (...)
+			catch (const sw::redis::Error&)
 			{
 				std::cout << "Dropping message: " << pubMessage.fullName << std::endl;
 			}
@@ -147,7 +147,7 @@ namespace // private
 			{
 				runSubscriber(channelSubscriptions, uuid);
 			}
-			catch (...)
+			catch (const sw::redis::Error&)
 			{
 				std::cout << ".";
 			}
@@ -160,7 +160,7 @@ namespace // private
 
 		struct timespec ts;
 
-		auto retVal = timespec_get(&ts, TIME_UTC);
+		const auto retVal = timespec_get(&ts, TIME_UTC);
 
 		auto spec = new DataModel::TimeSpec();
 		spec->set_tv_sec(ts.tv_sec);
@@ -184,7 +184,7 @@ namespace // private
 
 void Logger::error(const char* file, const int line, const char* message)
 {
-	logMessage("ERROR:   ", file, line, DataModel::LogMessage_Category_ERROR, message);
+	logMessage("ERROR: ", file, line, DataModel::LogMessage_Category_ERROR, message);
 }
 
 void Logger::warning(const char* file, const int line, const char* message)
@@ -194,12 +194,12 @@ void Logger::warning(const char* file, const int line, const char* message)
 
 void Logger::info(const char* file, const int line, const char* message)
 {
-	logMessage("INFO:    ", file, line, DataModel::LogMessage_Category_INFO, message);
+	logMessage("INFO: ", file, line, DataModel::LogMessage_Category_INFO, message);
 }
 
 void Logger::error(const char* file, const int line, const std::string& message)
 {
-	logMessage("ERROR:   ", file, line, DataModel::LogMessage_Category_ERROR, message.c_str());
+	logMessage("ERROR: ", file, line, DataModel::LogMessage_Category_ERROR, message.c_str());
 }
 
 void Logger::warning(const char* file, const int line, const std::string& message)
@@ -209,7 +209,7 @@ void Logger::warning(const char* file, const int line, const std::string& messag
 
 void Logger::info(const char* file, const int line, const std::string& message)
 {
-	logMessage("INFO:    ", file, line, DataModel::LogMessage_Category_INFO, message.c_str());
+	logMessage("INFO: ", file, line, DataModel::LogMessage_Category_INFO, message.c_str());
 }
 
 void Publisher::addToQueue(const google::protobuf::Message& message)
@@ -251,7 +251,7 @@ int Microservice::start(int argc, char* argv[])
 
 	strcat(redisHost, ":6379");
 
-	g_redisHost = redisHost;
+	g_redisHost = std::string( redisHost );
 
 	std::thread subscribeThread(ProcessSubscribeQueueTask);
 	std::thread publishThread(ProcessPublishQueueTask);

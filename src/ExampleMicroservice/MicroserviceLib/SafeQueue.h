@@ -9,7 +9,7 @@ template <class T>
 class SafeQueue
 {
 public:
-    SafeQueue(void)
+    SafeQueue(void) noexcept
         : q()
         , m()
         , c()

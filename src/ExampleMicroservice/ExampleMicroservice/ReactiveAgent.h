@@ -10,7 +10,7 @@
 class ReactiveAgent
 {
 public:
-	ReactiveAgent()
+	ReactiveAgent() noexcept
 	{
 		m_timeSubscriber.onMessage([this](auto message)
 			{

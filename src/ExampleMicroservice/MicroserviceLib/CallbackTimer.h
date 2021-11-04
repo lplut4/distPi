@@ -3,10 +3,11 @@
 #include <atomic>
 #include <thread>
 
+// This class needs some work
 class CallbackTimer
 {
 public:
-    CallbackTimer() : m_execute(false) {}
+    CallbackTimer() noexcept : m_execute(false) {}
 
     ~CallbackTimer() 
     {
