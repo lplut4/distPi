@@ -1,9 +1,10 @@
 #pragma once
 
-#include <google/protobuf/message.h>
-#include <type_traits>
 #include <functional>
+#include <google/protobuf/message.h>
 #include <memory>
+#include <thread>
+#include <type_traits>
 
 #include "Logger.h"
 #include "Subscriber.h"
