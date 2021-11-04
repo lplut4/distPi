@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using StackExchange.Redis;
 
 namespace RedisInterface
@@ -13,18 +12,18 @@ namespace RedisInterface
             var redis = ConnectionMultiplexer.Connect("localhost");
             var sub = redis.GetSubscriber();
 
-            // Synchronous handler
-            sub.Subscribe("channel-1").OnMessage(channelMessage => {
-                Console.WriteLine((string)channelMessage.Message);
+            sub.Subscribe("DataModel.LogMessage").OnMessage(channelMessage => {
+
+                var inputStream = new Google.Protobuf.CodedInputStream(channelMessage.Message);
+                
+                var message = new DataModel.LogMessage();
+                message.MergeFrom(inputStream);
+
+                var consoleMessage = message.File + "(line " + message.Line + ") - " + message.Category.ToString() + " - " + message.Message;  
+                
+                Console.WriteLine(consoleMessage);
             });
 
-            // Asynchronous handler
-            sub.Subscribe("channel-1").OnMessage(async channelMessage => {
-                await Task.Delay(1000);
-                Console.WriteLine((string)channelMessage.Message);
-            });
-
-            sub.Publish("channel-1", "RedisInterface Publishing Message");
             while (true) ;
         }
     }
