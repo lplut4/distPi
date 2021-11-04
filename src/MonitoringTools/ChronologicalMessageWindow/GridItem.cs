@@ -1,4 +1,4 @@
-﻿namespace SubscriberWindowWPF
+﻿namespace ChronologicalMessageWindow
 {
     internal class GridItem
     {

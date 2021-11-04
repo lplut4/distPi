@@ -1,3 +1,3 @@
 @echo off
 
-start RedisInterface\SubscriberWindowWPF\bin\Release\SubscriberWindowWPF.exe localhost || ( echo Failed to start! & pause )
+start MonitoringTools\ChronologicalMessageWindow\bin\Release\ChronologicalMessageWindow.exe "localhost" "All Messages" || ( echo Failed to start! & pause )

@@ -1,7 +1,7 @@
 ﻿using System;
 using StackExchange.Redis;
 
-namespace RedisInterface
+namespace CommandLineLogViewer
 {
     class Program
     {

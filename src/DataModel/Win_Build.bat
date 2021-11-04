@@ -30,7 +30,7 @@ set list=%list% LogMessage.proto
 %protoc% %protocOptions% %list% || set errorBuildProtos=1
 
 set generateCsProj=..\GenerateCsProj\bin\Release\GenerateCsProj.exe
-set preprotoFile=..\..\RedisInterface\DataModel\DataModel.csproj.preProto
+set preprotoFile=..\..\MonitoringTools\DataModel\DataModel.csproj.preProto
 
 %generateCsProj% %preprotoFile% %csharpOutDirectory% %list%
 

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedisInterface", "RedisInterface\RedisInterface.csproj", "{D7AB50AA-F64F-4A86-B112-5B7CAF6A345E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLineLogViewer", "CommandLineLogViewer\CommandLineLogViewer.csproj", "{D7AB50AA-F64F-4A86-B112-5B7CAF6A345E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberWindowWPF", "SubscriberWindowWPF\SubscriberWindowWPF.csproj", "{677A2519-523C-4828-A9B5-0647AC170AFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChronologicalMessageWindow", "ChronologicalMessageWindow\ChronologicalMessageWindow.csproj", "{677A2519-523C-4828-A9B5-0647AC170AFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModel", "DataModel\DataModel.csproj", "{FF3F5546-7C71-49BC-9759-F4465AA79D41}"
 EndProject

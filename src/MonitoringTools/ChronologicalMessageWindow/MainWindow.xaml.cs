@@ -8,7 +8,7 @@ using System.Windows.Media;
 using DataModel;
 using StackExchange.Redis;
 
-namespace SubscriberWindowWPF
+namespace ChronologicalMessageWindow
 {
     public partial class MainWindow : Window
     {
@@ -25,6 +25,11 @@ namespace SubscriberWindowWPF
             if (args.Count > 0)
             {
                 redisHost = args[0];
+            }
+            if (args.Count > 1)
+            {
+                var windowTitle = args[1];
+                this.Title = windowTitle;
             }
 
             {

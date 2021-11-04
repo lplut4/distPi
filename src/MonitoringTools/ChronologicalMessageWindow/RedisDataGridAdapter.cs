@@ -6,7 +6,7 @@ using DataModel;
 using System.Windows.Media;
 using System.Text;
 
-namespace SubscriberWindowWPF
+namespace ChronologicalMessageWindow
 {
     public class RedisDataGridAdapter : IDisposable
     {

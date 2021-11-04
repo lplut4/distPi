@@ -6,7 +6,7 @@ using System.Windows.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace SubscriberWindowWPF
+namespace ChronologicalMessageWindow
 {
     // Respectfully adapted from https://stackoverflow.com/questions/23812357/how-to-bind-dynamic-json-into-treeview-wpf/28097883
 

@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
-namespace SubscriberWindowWPF
+namespace ChronologicalMessageWindow
 {
     public partial class App : Application
     {

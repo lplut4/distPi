@@ -64,10 +64,10 @@ echo Building DataModel...
 cd %rootDir%\DataModel
 call Win_Build.bat || set errorBuild=1
 
-echo Building RedisInterface...
-cd %rootDir%\RedisInterface
-%MS_BUILD% /m /t:restore /verbosity:quiet /noLogo RedisInterface.sln || set errorBuild=1
-%MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo RedisInterface.sln || set errorBuild=1
+echo Building MonitoringTools...
+cd %rootDir%\MonitoringTools
+%MS_BUILD% /m /t:restore /verbosity:quiet /noLogo MonitoringTools.sln || set errorBuild=1
+%MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo MonitoringTools.sln || set errorBuild=1
 
 echo Building ExampleMicroservice...
 cd %rootDir%\ExampleMicroservice
