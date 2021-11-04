@@ -154,7 +154,7 @@ namespace // private
 		}
 	}
 	
-	void logMessage(const std::string& prefix, const std::string& msg, const DataModel::LogMessage_Category& category)
+	void logMessage(const std::string& prefix, const char* file, const int line, const DataModel::LogMessage_Category& category, const char* msg)
 	{
 		DataModel::LogMessage logMessage;
 
@@ -166,11 +166,14 @@ namespace // private
 		spec->set_tv_sec(ts.tv_sec);
 		spec->set_tv_nsec(ts.tv_nsec);
 
+		auto fileName = new std::string(file);
 		auto message = new std::string(msg);
-
+		
 		logMessage.set_allocated_timeoflog(spec);
 		logMessage.set_category(category);
 		logMessage.set_allocated_message(message);
+		logMessage.set_allocated_file(fileName);
+		logMessage.set_line(line);
 
 		std::cout << prefix << msg << std::endl;
 
@@ -179,20 +182,35 @@ namespace // private
 
 }  // end private
 
-void Logger::error(const std::string& message) 
-{ 
-	logMessage("ERROR: ", message, DataModel::LogMessage_Category_ERROR);
-};
+void Logger::error(const char* file, const int line, const char* message)
+{
+	logMessage("ERROR:   ", file, line, DataModel::LogMessage_Category_ERROR, message);
+}
 
-void Logger::warning(const std::string& message) 
-{ 
-	logMessage("WARNING: ", message, DataModel::LogMessage_Category_WARNING);
-};
+void Logger::warning(const char* file, const int line, const char* message)
+{
+	logMessage("WARNING: ", file, line, DataModel::LogMessage_Category_WARNING, message);
+}
 
-void Logger::info(const std::string& message) 
-{ 
-	logMessage("INFO: ", message, DataModel::LogMessage_Category_INFO);
-};
+void Logger::info(const char* file, const int line, const char* message)
+{
+	logMessage("INFO:    ", file, line, DataModel::LogMessage_Category_INFO, message);
+}
+
+void Logger::error(const char* file, const int line, const std::string& message)
+{
+	logMessage("ERROR:   ", file, line, DataModel::LogMessage_Category_ERROR, message.c_str());
+}
+
+void Logger::warning(const char* file, const int line, const std::string& message)
+{
+	logMessage("WARNING: ", file, line, DataModel::LogMessage_Category_WARNING, message.c_str());
+}
+
+void Logger::info(const char* file, const int line, const std::string& message)
+{
+	logMessage("INFO:    ", file, line, DataModel::LogMessage_Category_INFO, message.c_str());
+}
 
 void Publisher::addToQueue(const google::protobuf::Message& message)
 {

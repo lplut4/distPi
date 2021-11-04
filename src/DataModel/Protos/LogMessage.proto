@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package DataModel;
 
@@ -14,7 +14,9 @@ message LogMessage
 		ERROR   = 3;
 	}
 
-	required TimeSpec timeOfLog = 1;
-	required Category category  = 2;
-	required string   message   = 3;
+	TimeSpec timeOfLog = 1;
+	Category category  = 2;
+	string   message   = 3;
+	string   file      = 4;
+	uint32   line      = 5;
 }

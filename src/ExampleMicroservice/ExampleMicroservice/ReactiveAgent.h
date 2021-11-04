@@ -22,7 +22,7 @@ public:
 				std::cout << "Tick!" << std::endl;
 			});
 
-		Logger::error("Not really");
+		Logger::error(__FILELINE__, "Not really");
 	};
 
 	~ReactiveAgent() {};

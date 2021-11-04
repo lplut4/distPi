@@ -41,7 +41,7 @@ public:
 		auto success = msg->ParseFromString(encodedMsg);
 		if (!success)
 		{
-			Logger::error("Could not deserialize: " + msg->GetTypeName());
+			Logger::error(__FILELINE__, "Could not deserialize: " + msg->GetTypeName());
 		}
 		m_messageQueue.enqueue(std::dynamic_pointer_cast<T>(msg));
 		return msg;

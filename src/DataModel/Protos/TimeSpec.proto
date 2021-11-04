@@ -1,9 +1,9 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package DataModel;
 
 message TimeSpec
 {
-	required uint64 tv_sec  = 1;
-	required uint32 tv_nsec = 2;
+	uint64 tv_sec  = 1;
+	uint32 tv_nsec = 2;
 }

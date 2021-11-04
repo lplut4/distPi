@@ -11,6 +11,10 @@ int main(int argc, char* argv[])
 	ReactiveAgent agent5;
 	ReactiveAgent agent6;
 
+	Logger::error(__FILELINE__, "hello" );
+
+	Logger::info(__FILELINE__, "hello info");
+
 	// Start Communications
 	return Microservice::start(argc, argv);
 }
