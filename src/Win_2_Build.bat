@@ -43,6 +43,11 @@ cd %rootDir%\Dependencies\StackExchange.Redis\
 %MS_BUILD% /m /t:restore /verbosity:quiet /noLogo StackExchange.Redis.sln || set errorBuild=1
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 StackExchange.Redis.sln || set errorBuild=1
 
+echo Building Newtonsoft.Json...
+cd %rootDir%\Dependencies\Newtonsoft.Json\src
+%MS_BUILD% /m /t:restore /verbosity:quiet /noLogo Newtonsoft.Json.sln || set errorBuild=1
+%MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 Newtonsoft.Json.sln || set errorBuild=1
+
 echo Building GenerateCsProj...
 cd %rootDir%\DataModel\GenerateCsProj
 %MS_BUILD% /m /t:build /p:Configuration=Release /verbosity:quiet /noLogo /p:WarningLevel=0 GenerateCsProj.sln || set errorBuild=1

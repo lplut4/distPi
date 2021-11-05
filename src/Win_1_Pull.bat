@@ -54,6 +54,16 @@ if not exist "StackExchange.Redis" (
 )
 cd %depDir%
 
+if not exist "Newtonsoft.Json" (
+	echo Pulling Newtonsoft.Json...
+	git clone %gitConfig% -b 13.0.1 https://github.com/JamesNK/Newtonsoft.Json.git || set error=1
+	cd Newtonsoft.Json
+	git apply ..\..\Patches\Newtonsoft.Json\0001-Patch-to-adjust-the-dotnet-SDK-version.patch
+) else (
+	echo Newtonsoft.Json already exists
+)
+cd %depDir%
+
 if not exist "protobuf" (
 	echo Pulling protobuf...
 	git clone %gitConfig% -b v3.18.1 https://github.com/protocolbuffers/protobuf.git || set error=1
