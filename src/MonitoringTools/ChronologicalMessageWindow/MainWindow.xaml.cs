@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using DataModel;
 using StackExchange.Redis;
 
 namespace ChronologicalMessageWindow
@@ -55,7 +54,7 @@ namespace ChronologicalMessageWindow
 
             new Thread(() =>
             {
-                var dataModelLibrary = ReflectiveDataModelCollection.GetSerializableTypes();
+                var dataModelLibrary = DataModel.ReflectiveDataModelCollection.GetSerializableTypes();
                 m_redisGridAdapter.Start(dataModelLibrary);
             }).Start();
         }
@@ -138,10 +137,10 @@ namespace ChronologicalMessageWindow
                 return;
             }
 
-            var time = new TimeSpec();
+            var time = new DataModel.Utility.TimeSpec();
             time.TvNsec = 1;
             time.TvSec = 1000;
-            byte[] buffer = ReflectiveDataModelCollection.Serialize(time);
+            byte[] buffer = DataModel.ReflectiveDataModelCollection.Serialize(time);
 
             var subscriber = m_redisClient.GetSubscriber();
             subscriber.Publish(time.GetType().FullName, buffer);
