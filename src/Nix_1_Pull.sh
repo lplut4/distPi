@@ -10,7 +10,7 @@ fi
 
 cd Dependencies
 
-gitConfig="-c advice.detachedHead=false"
+gitConfig="-c advice.detachedHead=false --depth 1 --single-branch"
 
 if [ ! -d "redis" ]; then
 	echo "Pulling redis..."

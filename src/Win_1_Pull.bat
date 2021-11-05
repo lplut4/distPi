@@ -14,7 +14,7 @@ if not exist "Dependencies" ( mkdir Dependencies || set error=1 )
 cd Dependencies
 set depDir=%cd%
 
-set gitConfig=-c advice.detachedHead=false
+set gitConfig=-c advice.detachedHead=false --depth 1 --single-branch
 
 if not exist "redis" (
 	echo Pulling redis...
@@ -47,6 +47,8 @@ cd %depDir%
 if not exist "StackExchange.Redis" (
 	echo Pulling StackExchange.Redis...
 	git clone %gitConfig% -b 2.2.79 https://github.com/StackExchange/StackExchange.Redis.git || set error=1
+	cd StackExchange.Redis
+	git apply ..\..\..\Patches\StackExchange.Redis\0001-Patch-to-remove-github-hooks.patch
 ) else (
 	echo StackExchange.Redis already exists
 )
