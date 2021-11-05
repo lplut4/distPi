@@ -1,54 +1,43 @@
 #pragma once
 
-#include <atomic>
-#include <thread>
-
-// This class needs some work
-class CallbackTimer
+class CallbackTimer 
 {
+    bool clear = false;
+
 public:
-    CallbackTimer() noexcept : m_execute(false) {}
-
-    ~CallbackTimer() 
+    template<typename Function>
+    void setTimeout(int milli_delay, Function function)
     {
-        if ( m_execute.load( std::memory_order_acquire ) ) 
+        this->clear = false;
+        std::thread t([=]() 
         {
-            stop();
-        };
+            if (this->clear) return;
+            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+            if (this->clear) return;
+            function();
+        });
+        t.detach();
     }
 
-    void stop()
+    template<typename Function>
+    void setInterval(int milli_interval, Function function)
     {
-        m_execute.store(false, std::memory_order_release);
-        if ( m_thread.joinable() )
+        this->clear = false;
+        std::thread t([=]() 
         {
-            m_thread.join();
-        }
-    }
-
-    void start(int interval_milli, std::function<void(void)> func)
-    {
-        if ( m_execute.load( std::memory_order_acquire ) ) 
-        {
-            stop();
-        };
-        m_execute.store( true, std::memory_order_release );
-        m_thread = std::thread( [this, interval_milli, func] ()
+            while (true) 
             {
-                while ( m_execute.load( std::memory_order_acquire ) ) 
-                {
-                    std::this_thread::sleep_for( std::chrono::milliseconds( interval_milli ) );
-                    func();
-                }
-            });
+                if (this->clear) return;
+                std::this_thread::sleep_for(std::chrono::milliseconds(milli_interval));
+                if (this->clear) return;
+                function();
+            }
+        });
+        t.detach();
     }
 
-    bool is_running() const noexcept 
+    void stop() 
     {
-        return ( m_execute.load( std::memory_order_acquire ) && m_thread.joinable() );
+        this->clear = true;
     }
-
-private:
-    std::atomic<bool> m_execute;
-    std::thread       m_thread;
 };

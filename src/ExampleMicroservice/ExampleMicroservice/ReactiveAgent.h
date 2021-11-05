@@ -13,22 +13,29 @@ public:
 	ReactiveAgent() noexcept
 	{
 		m_timeSubscriber.onMessage([this](auto message)
-			{
-				message->PrintDebugString();
-			});
+		{
+			message->PrintDebugString();
+		});
 
-		m_timer.start(1000, [this]()
-			{
-				std::cout << "Tick!" << std::endl;
-			});
+		m_timer.setInterval(1000, [this]()
+		{
+			std::cout << "Tick!" << std::endl;
+			timerCount++;
 
-		Logger::error(__FILELINE__, "Not really");
+			if (timerCount > 5)
+			{
+				m_timer.stop();
+			}
+		});
+
+		Logger::info(__FILELINE__, "Started ReactiveAgent");
 	};
 
 	~ReactiveAgent() {};
 
 private:
 
+	int timerCount = 0;
 	CallbackTimer m_timer;
 	MessageSubscriber<DataModel::TimeSpec> m_timeSubscriber;
 };
