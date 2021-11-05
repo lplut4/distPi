@@ -48,7 +48,7 @@ if not exist "StackExchange.Redis" (
 	echo Pulling StackExchange.Redis...
 	git clone %gitConfig% -b 2.2.79 https://github.com/StackExchange/StackExchange.Redis.git || set error=1
 	cd StackExchange.Redis
-	git apply ..\..\..\Patches\StackExchange.Redis\0001-Patch-to-remove-github-hooks.patch
+	git apply ..\..\Patches\StackExchange.Redis\0001-Patch-to-remove-github-hooks.patch
 ) else (
 	echo StackExchange.Redis already exists
 )
