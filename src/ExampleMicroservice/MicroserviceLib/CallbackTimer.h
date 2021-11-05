@@ -1,5 +1,8 @@
 #pragma once
 
+#include <thread>
+#include <chrono>
+
 class CallbackTimer 
 {
     bool clear = false;
@@ -12,7 +15,7 @@ public:
         std::thread t([=]() 
         {
             if (this->clear) return;
-            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+            std::this_thread::sleep_for(std::chrono::milliseconds(milli_delay));
             if (this->clear) return;
             function();
         });

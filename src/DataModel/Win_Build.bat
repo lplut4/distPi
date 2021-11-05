@@ -19,13 +19,17 @@ if not exist "out\python" ( mkdir out\python || set errorBuildProtos=1 )
 
 cd Protos
 
+set list=Utility\TimeSpec.proto
+set list=%list% Utility\LogMessage.proto
+set list=%list% Test\Ping.proto
+set list=%list% Test\Pong.proto
+
 set csharpOutDirectory=..\out\csharp
 
-set protoc=..\..\Dependencies\protobuf\cmake\build\Release\protoc.exe
-set protocOptions=--cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --python_out=..\out\python
+set includePath=--proto_path=Utility --proto_path=Test
+set protocOptions=%includePath% --cpp_out=..\out\cpp --csharp_out=%csharpOutDirectory% --python_out=..\out\python
 
-set list=TimeSpec.proto
-set list=%list% LogMessage.proto
+set protoc=..\..\Dependencies\protobuf\cmake\build\Release\protoc.exe
 
 %protoc% %protocOptions% %list% || set errorBuildProtos=1
 

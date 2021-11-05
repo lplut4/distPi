@@ -6,11 +6,13 @@
 #include "Publisher.h"
 #include "Subscriber.h"
 
-#include <string>
-#include <time.h>
+#include <atomic>
 #include <iostream>
+#include <mutex>
+#include <string>
 #include <sw/redis++/redis++.h>
 #include <thread>
+#include <time.h>
 
 #include "IMessageSubscriber.h"
 #include "LogMessage.pb.h"
@@ -18,13 +20,15 @@
 #include "SafeQueue.h"
 #include "uuid.h"
 
-namespace // private
+namespace // private anonymous namespace
 {
-	SafeQueue<PubSubMessage> publishQueue;
-	SafeQueue<PubSubMessage> subscribeQueue;
+	SafeQueue<PubSubMessage> g_publishQueue;
+	SafeQueue<PubSubMessage> g_subscribeQueue;
 	std::string g_redisHost = "";
-	bool continueProcessing = true;
-	std::map<std::string, std::vector<IMessageSubscriber*>> subscribersPerChannel;
+	std::atomic<bool> g_startProcessing(false);
+	std::atomic<bool> g_continueProcessing(true);
+	std::mutex g_registrationMutex;
+	std::map<std::string, std::vector<IMessageSubscriber*>> g_subscribersPerChannel;
 	
 	std::string msgTypeToString(const sw::redis::Subscriber::MsgType& type)
 	{
@@ -39,11 +43,13 @@ namespace // private
 	
 	void ProcessPublishQueueTask()
 	{
+		while (!g_startProcessing);
+
 		auto redis = sw::redis::Redis(g_redisHost);
 
-		while (continueProcessing)
+		while (g_continueProcessing)
 		{
-			auto pubMessage = publishQueue.dequeue();
+			auto pubMessage = g_publishQueue.dequeue();
 			try
 			{
 				redis.publish(pubMessage.fullName, pubMessage.serializedData);
@@ -57,22 +63,24 @@ namespace // private
 	
 	void queueUpSubscribe(const std::string& channel, const std::string& msg)
 	{
-		subscribeQueue.enqueue(PubSubMessage(channel, msg));
+		g_subscribeQueue.enqueue(PubSubMessage(channel, msg));
 	}
 	
 	void ProcessSubscribeQueueTask()
 	{
-		while (continueProcessing)
+		while (!g_startProcessing);
+
+		while (g_continueProcessing)
 		{
-			auto subMessage = subscribeQueue.dequeue();
+			auto subMessage = g_subscribeQueue.dequeue();
 			auto data       = subMessage.serializedData;
 			auto name       = subMessage.fullName;
 
-			if (subscribersPerChannel.find(name) != subscribersPerChannel.end())
+			if (g_subscribersPerChannel.find(name) != g_subscribersPerChannel.end())
 			{
 				DeserializedMessage msg = nullptr;
 				bool deserialized = false;
-				for (auto subscriber : subscribersPerChannel[name])
+				for (auto subscriber : g_subscribersPerChannel[name])
 				{
 					if (!deserialized)
 					{
@@ -111,6 +119,8 @@ namespace // private
 		sub.subscribe(channels.begin(), channels.end());
 
 		std::cout << "New Microservice is up: " << uuid << std::endl;;
+
+		g_startProcessing = true;
 
 		auto noException = true;
 		while (noException)
@@ -154,15 +164,15 @@ namespace // private
 		}
 	}
 	
-	void logMessage(const std::string& prefix, const char* file, const int line, const DataModel::LogMessage_Category& category, const char* msg)
+	void logMessage(const std::string& prefix, const char* file, const int line, const DataModel::Utility::LogMessage_Category& category, const char* msg)
 	{
-		DataModel::LogMessage logMessage;
+		DataModel::Utility::LogMessage logMessage;
 
 		struct timespec ts;
 
 		const auto retVal = timespec_get(&ts, TIME_UTC);
 
-		auto spec = new DataModel::TimeSpec();
+		auto spec = new DataModel::Utility::TimeSpec();
 		spec->set_tv_sec(ts.tv_sec);
 		spec->set_tv_nsec(ts.tv_nsec);
 
@@ -180,52 +190,61 @@ namespace // private
 		Publisher::addToQueue(logMessage);
 	}
 
-}  // end private
+}  // end private namespace
 
 void Logger::error(const char* file, const int line, const char* message)
 {
-	logMessage("ERROR: ", file, line, DataModel::LogMessage_Category_ERROR, message);
+	logMessage("ERROR: ", file, line, DataModel::Utility::LogMessage_Category_ERROR, message);
 }
 
 void Logger::warning(const char* file, const int line, const char* message)
 {
-	logMessage("WARNING: ", file, line, DataModel::LogMessage_Category_WARNING, message);
+	logMessage("WARNING: ", file, line, DataModel::Utility::LogMessage_Category_WARNING, message);
 }
 
 void Logger::info(const char* file, const int line, const char* message)
 {
-	logMessage("INFO: ", file, line, DataModel::LogMessage_Category_INFO, message);
+	logMessage("INFO: ", file, line, DataModel::Utility::LogMessage_Category_INFO, message);
 }
 
 void Logger::error(const char* file, const int line, const std::string& message)
 {
-	logMessage("ERROR: ", file, line, DataModel::LogMessage_Category_ERROR, message.c_str());
+	logMessage("ERROR: ", file, line, DataModel::Utility::LogMessage_Category_ERROR, message.c_str());
 }
 
 void Logger::warning(const char* file, const int line, const std::string& message)
 {
-	logMessage("WARNING: ", file, line, DataModel::LogMessage_Category_WARNING, message.c_str());
+	logMessage("WARNING: ", file, line, DataModel::Utility::LogMessage_Category_WARNING, message.c_str());
 }
 
 void Logger::info(const char* file, const int line, const std::string& message)
 {
-	logMessage("INFO: ", file, line, DataModel::LogMessage_Category_INFO, message.c_str());
+	logMessage("INFO: ", file, line, DataModel::Utility::LogMessage_Category_INFO, message.c_str());
 }
 
 void Publisher::addToQueue(const google::protobuf::Message& message)
 {
-	publishQueue.enqueue(PubSubMessage(message));
+	g_publishQueue.enqueue(PubSubMessage(message));
 }
 
-void Subscriber::registerSubscriber(const std::string& channel, IMessageSubscriber* sub)
+bool Subscriber::registerSubscriber(const std::string& channel, IMessageSubscriber* sub)
 {
-	if (subscribersPerChannel.find(channel) == subscribersPerChannel.end())
+	std::lock_guard<std::mutex> guard(g_registrationMutex);
+
+	if (g_startProcessing)
 	{
-		std::vector<IMessageSubscriber*> subscribers;
-		subscribersPerChannel.emplace(channel, subscribers);
+		return false;
 	}
 
-	subscribersPerChannel[channel].push_back(sub);
+	if (g_subscribersPerChannel.find(channel) == g_subscribersPerChannel.end())
+	{
+		std::vector<IMessageSubscriber*> subscribers;
+		g_subscribersPerChannel.emplace(channel, subscribers);
+	}
+
+	g_subscribersPerChannel[channel].push_back(sub);
+
+	return true;
 }
 
 int Microservice::start(int argc, char* argv[])
@@ -258,14 +277,14 @@ int Microservice::start(int argc, char* argv[])
 
 	try
 	{
-		runService(subscribersPerChannel);
+		runService(g_subscribersPerChannel);
 	}
 	catch (const std::system_error& exception)
 	{
 		std::cout << exception.what() << std::endl;
 	}
 
-	continueProcessing = false;
+	g_continueProcessing = false;
 
 	publishThread.join();
 	subscribeThread.join();

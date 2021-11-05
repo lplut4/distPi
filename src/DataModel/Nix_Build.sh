@@ -9,7 +9,7 @@ fi
 
 cd out
 
-if [ ! -d "cpp" ]; then
+if [ ! -d "cpp" ]; then 
 	mkdir cpp
 fi
 if [ ! -d "csharp" ]; then
@@ -23,9 +23,11 @@ cd ..
 
 cd Protos
 
-protoc="../../Dependencies/protobuf/src/protoc"
-protocOptions="--cpp_out=../out/cpp --csharp_out=../out/csharp --python_out=../out/python"
+list="Utility/TimeSpec.proto Utility/LogMessage.proto Test/Ping.proto Test/Pong.proto"
 
-list="TimeSpec.proto LogMessage.proto"
+includePath="--proto_path=Utility --proto_path=Test"
+protocOptions="$includePath --cpp_out=../out/cpp --csharp_out=../out/csharp --python_out=../out/python"
+
+protoc="../../Dependencies/protobuf/src/protoc"
 
 $protoc $protocOptions $list

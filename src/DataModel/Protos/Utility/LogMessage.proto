@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package DataModel;
+package DataModel.Utility;
 
 import "TimeSpec.proto";
 

@@ -2,21 +2,22 @@ cmake_minimum_required(VERSION 3.10)
 
 project(ExampleMicroservice)
 
-	include_directories(../Dependencies/redis-plus-plus/src)
-	include_directories(../Dependencies/redis/deps)
-	include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/cxx11)
-	include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/no_tls)
-	include_directories(../Dependencies/protobuf/src)
-	include_directories(../DataModel/out/cpp)
-	include_directories(.)
-
+include_directories(.)
+include_directories(../DataModel/out/cpp)
+include_directories(../Dependencies/redis-plus-plus/src)
+include_directories(../Dependencies/redis/deps)
+include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/cxx11)
+include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/no_tls)
+include_directories(../Dependencies/protobuf/src)
+	
 if (UNIX)
 	include_directories(/usr/local/include)
 endif (UNIX)
 
-add_library(MicroserviceLib OBJECT ../DataModel/out/cpp/TimeSpec.pb.cc ../DataModel/out/cpp/LogMessage.pb.cc MicroserviceLib/Microservice.cpp)
 add_executable(ExampleMicroservice ExampleMicroservice/ExampleMicroservice.cpp)
 
+file(GLOB DataModel ../DataModel/out/cpp/*.pb.cc)
+add_library(MicroserviceLib OBJECT ${DataModel} MicroserviceLib/Microservice.cpp)
 target_link_libraries(ExampleMicroservice PUBLIC MicroserviceLib)
 
 if (UNIX)
