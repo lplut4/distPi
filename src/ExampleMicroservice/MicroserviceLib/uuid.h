@@ -35,17 +35,9 @@ std::string newUUID()
         RpcStringFreeA(&str);
     #else
 		uuid_t uuid;
-        const auto status1 = uuid_generate_random(uuid);
-        if (status1 != 0)
-        {
-            return ZEROED_UUID;
-        }
+		uuid_generate_random(uuid);
         char s[37];
-        const auto status2 = uuid_unparse(uuid, s);
-        if (status2 != 0)
-        {
-            return ZEROED_UUID;
-        }
+        uuid_unparse(uuid, s);
     #endif
         return s;
 }

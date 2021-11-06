@@ -41,6 +41,11 @@ cd ..
 
 cd ..
 
+echo Running protoc...
+cd DataModel
+./Nix_Build.sh
+cd ..
+
 echo Building ExampleMicroservice...
 cd ExampleMicroservice
 mkdir build
