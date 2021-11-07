@@ -25,7 +25,7 @@ public:
 					{
 						DataModel::Test::Pong reply;
 						reply.set_count(count);
-						Publisher::addToQueue(reply);
+						Publisher::addToQueue(reply); 
 					});
 			});
 
@@ -40,20 +40,20 @@ public:
 					{
 						DataModel::Test::Ping reply;
 						reply.set_count(count);
-						Publisher::addToQueue(reply);
+						Publisher::addToQueue(reply); std::cout << "Pub" << std::endl;
 					});
 			});
 
 		m_timer.setInterval(1000, [this]()
-		{
-			std::cout << "Tick!" << std::endl;
-			timerCount++;
-
-			if (timerCount > 5)
 			{
-				m_timer.stop();
-			}
-		});
+				std::cout << "Tick!" << std::endl;
+				timerCount++;
+
+				if (timerCount > 5)
+				{
+					m_timer.stop();
+				}
+			});
 
 		Logger::info(__FILELINE__, "Started ReactiveAgent");
 
