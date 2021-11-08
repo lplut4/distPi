@@ -3,37 +3,57 @@
 #include <thread>
 #include <chrono>
 
+using interval_t = std::chrono::milliseconds;
+
 class CallbackTimer 
 {
-    bool clear = false;
+private:
 
+    std::atomic<bool> enabled;
+	mutable std::mutex mtx;
+	std::condition_variable cvar;
+	
 public:
-    template<typename Function>
-    void setTimeout(int milli_delay, Function function)
-    {
-        this->clear = false;
-        std::thread t([=]() 
-        {
-            if (this->clear) return;
-            std::this_thread::sleep_for(std::chrono::milliseconds(milli_delay));
-            if (this->clear) return;
-            function();
-        });
-        t.detach();
-    }
+
+	CallbackTimer()
+	{
+		enabled = true;
+	}
+
+    //template<typename Function>
+    //void setTimeout(interval_t milli_delay, Function function)
+    //{		
+    //    std::thread t([=]() 
+    //    {			
+    //        auto deadline = std::chrono::steady_clock::now() + milli_delay;
+    //        std::unique_lock<std::mutex> lock{mtx};
+	//		if (cvar.wait_until(lock, deadline) == std::cv_status::timeout) 
+	//		{
+	//			lock.unlock();
+	//			function();
+	//			lock.lock();
+	//		}
+    //    });
+    //    t.detach();
+    //}
 
     template<typename Function>
-    void setInterval(int milli_interval, Function function)
+    void setInterval(interval_t milli_interval, Function function)
     {
-        this->clear = false;
+		enabled = true;
         std::thread t([=]() 
-        {
-            while (true) 
+        {			
+			auto deadline = std::chrono::steady_clock::now() + milli_interval;
+            std::unique_lock<std::mutex> lock{mtx};
+            while (enabled) 
             {
-                if (this->clear) return;
-                std::this_thread::sleep_for(std::chrono::milliseconds(milli_interval));
-                if (this->clear) return;
-                function();
+                if (cvar.wait_until(lock, deadline) == std::cv_status::timeout) 
+				{
+                    lock.unlock();
+                    function();
+                    deadline += milli_interval;
+                    lock.lock();
+                }
             }
         });
         t.detach();
@@ -41,6 +61,13 @@ public:
 
     void stop() 
     {
-        this->clear = true;
+		if (enabled) 
+		{
+			{
+				std::lock_guard<std::mutex> _{mtx};
+				enabled = false;
+			}
+			cvar.notify_one();
+		}
     }
 };

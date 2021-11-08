@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <MicroserviceLib/MessageSubscriber.h>
 #include <MicroserviceLib/CallbackTimer.h>
 #include <MicroserviceLib/Publisher.h>
@@ -9,47 +10,44 @@
 #include "Pong.pb.h"
 #include "LogMessage.pb.h"
 
+using namespace std::chrono_literals;
+
 class ReactiveAgent
 {
 public:
 	ReactiveAgent() noexcept
 	{
-		m_pingSubscriber.onMessage([this](std::shared_ptr<DataModel::Test::Ping> message)
+		m_pingSubscriber.onMessage([](std::shared_ptr<DataModel::Test::Ping> message)
 			{
 				uint64_t count = message->count() + 1;
 
 				std::cout << "Pong " << count << std::endl;
 
-				CallbackTimer pingTimer;
-				pingTimer.setTimeout(1000, [count]()
-					{
-						DataModel::Test::Pong reply;
-						reply.set_count(count);
-						Publisher::addToQueue(reply); 
-					});
+				std::this_thread::sleep_for(1000ms);
+				
+				DataModel::Test::Pong reply;
+				reply.set_count(count);
+				Publisher::addToQueue(reply);
 			});
 
-		m_pongSubscriber.onMessage([this](std::shared_ptr<DataModel::Test::Pong> message)
+		m_pongSubscriber.onMessage([](std::shared_ptr<DataModel::Test::Pong> message)
 			{
 				uint64_t count = message->count() + 1;
 
 				std::cout << "Ping " << count << std::endl;
 
-				CallbackTimer pingTimer;
-				pingTimer.setTimeout(1000, [count]()
-					{
-						DataModel::Test::Ping reply;
-						reply.set_count(count);
-						Publisher::addToQueue(reply); std::cout << "Pub" << std::endl;
-					});
+				std::this_thread::sleep_for(1000ms);
+
+				DataModel::Test::Ping reply;
+				reply.set_count(count);
+				Publisher::addToQueue(reply);
 			});
 
-		m_timer.setInterval(1000, [this]()
+		m_timer.setInterval(std::chrono::milliseconds(1000), [this]()
 			{
 				std::cout << "Tick!" << std::endl;
-				timerCount++;
-
-				if (timerCount > 5)
+				m_timerCount++;
+				if (m_timerCount > 5)
 				{
 					m_timer.stop();
 				}
@@ -68,7 +66,7 @@ public:
 
 private:
 
-	int timerCount = 0;
+	int m_timerCount = 0;
 	CallbackTimer m_timer;
 
 	MessageSubscriber<DataModel::Test::Ping> m_pingSubscriber;
