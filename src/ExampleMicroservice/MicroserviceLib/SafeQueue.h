@@ -9,13 +9,13 @@ template <class T>
 class SafeQueue
 {
 public:
-    SafeQueue(void) noexcept
+    SafeQueue() noexcept
         : q()
         , m()
         , c()
     {}
 
-    ~SafeQueue(void)
+    ~SafeQueue()
     {}
 
     // Add an element to the queue.
@@ -28,7 +28,7 @@ public:
 
     // Get the "front"-element.
     // If the queue is empty, wait till a element is avaiable.
-    T dequeue(void)
+    T dequeue()
     {
         std::unique_lock<std::mutex> lock(m);
         while (q.empty())
@@ -42,7 +42,7 @@ public:
     }
 
 private:
-    std::queue<T> q;
-    mutable std::mutex m;
+    std::queue<T>           q;
+    mutable std::mutex      m;
     std::condition_variable c;
 };

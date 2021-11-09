@@ -76,6 +76,8 @@ namespace // private anonymous namespace
 			auto data       = subMessage.serializedData;
 			auto name       = subMessage.fullName;
 
+			std::lock_guard<std::mutex> guard(g_registrationMutex);
+
 			if (g_subscribersPerChannel.find(name) != g_subscribersPerChannel.end())
 			{
 				DeserializedMessage msg = nullptr;
@@ -245,6 +247,26 @@ bool Subscriber::registerSubscriber(const std::string& channel, IMessageSubscrib
 	g_subscribersPerChannel[channel].push_back(sub);
 
 	return true;
+}
+
+void Subscriber::unregisterSubscriber(const std::string& channel, IMessageSubscriber* sub)
+{
+	std::lock_guard<std::mutex> guard(g_registrationMutex);
+	
+	if (g_subscribersPerChannel.find(channel) == g_subscribersPerChannel.end())
+	{
+		return;
+	}
+	
+	auto & channelSubscribers = g_subscribersPerChannel[channel];
+	for ( auto iter = channelSubscribers.begin(); iter != channelSubscribers.end(); iter++ )
+	{
+		// TODO - Implement cleanup routine
+		//if ( iter == sub )
+		//{
+		//	channelSubscribers.erase( iter );
+		//}
+	}
 }
 
 int Microservice::start(int argc, char* argv[])

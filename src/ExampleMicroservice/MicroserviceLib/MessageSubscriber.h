@@ -18,21 +18,34 @@ class MessageSubscriber : public IMessageSubscriber
 
 public:
 
-	MessageSubscriber() noexcept
-	{
-		m_consumeThread = std::thread{ &MessageSubscriber::ConsumeThreadMain, this };
-	};
-
-	~MessageSubscriber() {};
-
 	using SubscribeCallback = std::function<void(std::shared_ptr<T> msg)>;
 
-	void onMessage(SubscribeCallback subCallback)
+	MessageSubscriber() noexcept
+		: m_consumeThread(std::thread{ &MessageSubscriber::ConsumeThreadMain, this })
+		, m_enabled(true)
+		, m_messageQueue()
+	{};
+
+	~MessageSubscriber() 
+	{
+		DeserializedMessage message = std::make_shared<T>();
+		Subscriber::unregisterSubscriber(message->GetTypeName(), this);
+		message.reset();
+		m_enabled = false;
+		m_consumeThread.join();
+	};
+
+	bool onMessage(SubscribeCallback subCallback)
 	{
 		m_subscribeCallback = subCallback;
 		DeserializedMessage message = std::make_shared<T>();
-		Subscriber::registerSubscriber(message->GetTypeName(), this);
+		auto registered = Subscriber::registerSubscriber(message->GetTypeName(), this);		
+		if (!registered)
+		{
+			Logger::error(__FILELINE__, "Failed to register MessageSubscriber: " + message->GetTypeName());
+		}
 		message.reset();
+		return registered;
 	}
 
 	// Deserialize the message, and pass it on to the subscriber
@@ -58,14 +71,15 @@ private:
 
 	void ConsumeThreadMain()
 	{
-		while (true)
+		while (m_enabled)
 		{
 			auto msg = m_messageQueue.dequeue();
 			m_subscribeCallback(msg);
 		}
 	}
 
-	SubscribeCallback              m_subscribeCallback;
-	SafeQueue<std::shared_ptr<T>>  m_messageQueue;
-	std::thread                    m_consumeThread;
+	std::thread                   m_consumeThread;
+	std::atomic<bool>             m_enabled;
+	SafeQueue<std::shared_ptr<T>> m_messageQueue;
+	SubscribeCallback             m_subscribeCallback;
 };

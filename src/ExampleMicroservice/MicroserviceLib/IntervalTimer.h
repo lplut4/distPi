@@ -1,44 +1,30 @@
 #pragma once
 
-#include <thread>
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 using interval_t = std::chrono::milliseconds;
 
-class CallbackTimer 
-{
-private:
-
-    std::atomic<bool> enabled;
-	mutable std::mutex mtx;
-	std::condition_variable cvar;
-	
+class IntervalTimer 
+{	
 public:
 
-	CallbackTimer()
+	IntervalTimer() noexcept
+		: enabled( true )
+		, mtx()
+		, cvar()
+	{}
+	
+	~IntervalTimer()
 	{
-		enabled = true;
+		enabled = false;
 	}
-
-    //template<typename Function>
-    //void setTimeout(interval_t milli_delay, Function function)
-    //{		
-    //    std::thread t([=]() 
-    //    {			
-    //        auto deadline = std::chrono::steady_clock::now() + milli_delay;
-    //        std::unique_lock<std::mutex> lock{mtx};
-	//		if (cvar.wait_until(lock, deadline) == std::cv_status::timeout) 
-	//		{
-	//			lock.unlock();
-	//			function();
-	//			lock.lock();
-	//		}
-    //    });
-    //    t.detach();
-    //}
-
+	
     template<typename Function>
-    void setInterval(interval_t milli_interval, Function function)
+    void onInterval(interval_t milli_interval, Function function)
     {
 		enabled = true;
         std::thread t([=]() 
@@ -70,4 +56,11 @@ public:
 			cvar.notify_one();
 		}
     }
+	
+private:
+
+	std::condition_variable cvar;
+    std::atomic<bool> 		enabled;
+	mutable std::mutex      mtx;
+
 };
