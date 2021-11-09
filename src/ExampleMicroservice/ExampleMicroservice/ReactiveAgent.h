@@ -17,7 +17,7 @@ class ReactiveAgent
 public:
 	ReactiveAgent() noexcept
 	{
-		m_pingSubscriber.onMessage([](std::shared_ptr<DataModel::Test::Ping> message)
+		m_pingSubscriber.onMessage([](auto message)
 			{
 				uint64_t count = message->count() + 1;
 
@@ -30,7 +30,7 @@ public:
 				Publisher::addToQueue(reply);
 			});
 
-		m_pongSubscriber.onMessage([](std::shared_ptr<DataModel::Test::Pong> message)
+		m_pongSubscriber.onMessage([](auto message)
 			{
 				uint64_t count = message->count() + 1;
 
@@ -43,7 +43,7 @@ public:
 				Publisher::addToQueue(reply);
 			});
 
-		m_timer.setInterval(std::chrono::milliseconds(1000), [this]()
+		m_timer.setInterval(1000ms, [this]()
 			{
 				std::cout << "Tick!" << std::endl;
 				m_timerCount++;
