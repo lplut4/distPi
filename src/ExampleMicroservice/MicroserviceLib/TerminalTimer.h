@@ -36,7 +36,7 @@ public:
         });
     }
 
-    void stop() 
+    void stop() noexcept
     {
 		cvar.notify_one();
     }
@@ -44,6 +44,6 @@ public:
 private:
 
 	std::condition_variable cvar;
-	mutable std::mutex      mtx;
+	mutable std::mutex      mtx;  
 	std::thread             timerThread;
 };

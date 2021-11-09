@@ -20,13 +20,13 @@ public:
 
 	using SubscribeCallback = std::function<void(std::shared_ptr<T> msg)>;
 
-	MessageSubscriber() noexcept
+	MessageSubscriber() 
 		: m_consumeThread(std::thread{ &MessageSubscriber::ConsumeThreadMain, this })
 		, m_enabled(true)
 		, m_messageQueue()
 	{};
 
-	~MessageSubscriber() 
+	virtual ~MessageSubscriber() 
 	{
 		DeserializedMessage message = std::make_shared<T>();
 		Subscriber::unregisterSubscriber(message->GetTypeName(), this);

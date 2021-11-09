@@ -20,7 +20,7 @@ public:
 	{
 		m_pingSubscriber.onMessage([this](auto message)
 			{
-				uint64_t count = message->count() + 1;
+				const uint64_t count = message->count() + 1;
 
 				std::cout << "Pong " << count << std::endl;
 
@@ -35,7 +35,7 @@ public:
 
 		m_pongSubscriber.onMessage([this](auto message)
 			{
-				uint64_t count = message->count() + 1;
+				const uint64_t count = message->count() + 1;
 
 				std::cout << "Ping " << count << std::endl;
 
