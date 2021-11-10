@@ -6,8 +6,7 @@
 #include <mutex>
 #include <thread>
 
-using interval_t = std::chrono::milliseconds;
-
+// Fires off events at a defined interval
 class IntervalTimer 
 {	
 public:
@@ -23,13 +22,13 @@ public:
 		enabled = false;
 	}
 	
-    template<typename Function>
-    void onInterval(interval_t milli_interval, Function function)
+    template<class _Rep, class _Period, typename Function>
+    void onInterval(const std::chrono::duration<_Rep, _Period>& interval, Function function)
     {
 		enabled = true;
         std::thread t([=]() 
         {			
-			auto deadline = std::chrono::steady_clock::now() + milli_interval;
+			auto deadline = std::chrono::steady_clock::now() + interval;
             std::unique_lock<std::mutex> lock{mtx};
             while (enabled) 
             {
@@ -37,7 +36,7 @@ public:
 				{
                     lock.unlock();
                     function();
-                    deadline += milli_interval;
+                    deadline += interval;
                     lock.lock();
                 }
             }
@@ -62,5 +61,4 @@ private:
 	std::condition_variable cvar;
     std::atomic<bool> 		enabled;
 	mutable std::mutex      mtx;
-
 };

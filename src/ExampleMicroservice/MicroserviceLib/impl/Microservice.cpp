@@ -96,21 +96,25 @@ namespace // private anonymous namespace
 		}
 	}
 
-	void runSubscriber(const std::map<std::string, std::vector<IMessageSubscriber*>>& channelSubscriptions, const std::string& uuid)
+	void runSubscriber(const std::map<std::string, std::vector<IMessageSubscriber*>>& channelSubscriptions)
 	{
 		auto redis = sw::redis::Redis(g_redisHost);
 		auto sub = redis.subscriber();
 
-		std::cout << std::endl << "Connected!" << std::endl;
+		std::cout << "Connected!" << std::endl;
 
 		sub.on_message([](std::string channel, std::string msg)
 			{
 				queueUpSubscribe(channel, msg);
 			});
 
+		std::cout << "##################################################" << std::endl;
+		std::cout << "Number\tType\t\tChannel" << std::endl;
+		std::cout << "##################################################" << std::endl;
+
 		sub.on_meta([](sw::redis::Subscriber::MsgType type, sw::redis::OptionalString channel, long long num)
 			{
-				std::cout << "Received " << msgTypeToString(type) << " on " << channel.value() << " number " << num << std::endl;
+				std::cout << num << "\t" << msgTypeToString(type) << "\t" << channel.value() << std::endl;
 			});
 
 		std::vector<std::string> channels;
@@ -119,8 +123,6 @@ namespace // private anonymous namespace
 			channels.push_back(keyValuePair.first);
 		}
 		sub.subscribe(channels.begin(), channels.end());
-
-		std::cout << "New Microservice is up: " << uuid << std::endl;;
 
 		g_startProcessing = true;
 
@@ -152,12 +154,11 @@ namespace // private anonymous namespace
 		std::string uuid = newUUID();
 		std::cout << "Running Example Microservice Instance: " << uuid << std::endl;
 		std::cout << "Attempting to connect to " << g_redisHost << std::endl;
-
 		while (true)
 		{
 			try
 			{
-				runSubscriber(channelSubscriptions, uuid);
+				runSubscriber(channelSubscriptions);
 			}
 			catch (const sw::redis::Error&)
 			{

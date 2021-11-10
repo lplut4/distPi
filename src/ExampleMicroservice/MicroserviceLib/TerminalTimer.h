@@ -5,8 +5,7 @@
 #include <mutex>
 #include <thread>
 
-using interval_t = std::chrono::milliseconds;
-
+// Fires off a single event after a duration has elapsed
 class TerminalTimer 
 {	
 public:
@@ -19,12 +18,12 @@ public:
 	~TerminalTimer()
 	{}
 	
-    template<typename Function>
-    void onTimeout(interval_t milli_delay, Function function)
+	template<class _Rep, class _Period, typename Function>
+	void onInterval(const std::chrono::duration<_Rep, _Period>& delay, Function function)
     {
 		std::thread t([=]() 
         {					
-			auto deadline = std::chrono::steady_clock::now() + milli_delay;
+			auto deadline = std::chrono::steady_clock::now() + delay;
             std::unique_lock<std::mutex> lock{mtx};
 			if (cvar.wait_until(lock, deadline) == std::cv_status::timeout) 
 			{
