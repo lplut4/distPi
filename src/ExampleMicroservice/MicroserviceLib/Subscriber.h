@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IMessageSubscriber.h"
+#include "impl/IMessageSubscriber.h"
 
 namespace Subscriber
 {

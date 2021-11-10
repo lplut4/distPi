@@ -3,7 +3,6 @@
 #include "google/protobuf/message.h"
 #include <string>
 
-
 class PubSubMessage
 {
 public:

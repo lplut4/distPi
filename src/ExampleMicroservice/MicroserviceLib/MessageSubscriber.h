@@ -8,7 +8,7 @@
 
 #include "Logger.h"
 #include "Subscriber.h"
-#include "IMessageSubscriber.h"
+#include "impl/IMessageSubscriber.h"
 #include "SafeQueue.h"
 
 template <class T>

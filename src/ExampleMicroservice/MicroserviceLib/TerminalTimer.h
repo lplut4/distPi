@@ -17,14 +17,12 @@ public:
 	{}
 	
 	~TerminalTimer()
-	{
-		timerThread.join();
-	}
+	{}
 	
     template<typename Function>
     void onTimeout(interval_t milli_delay, Function function)
     {
-        timerThread = std::thread([=]() 
+		std::thread t([=]() 
         {					
 			auto deadline = std::chrono::steady_clock::now() + milli_delay;
             std::unique_lock<std::mutex> lock{mtx};
@@ -34,6 +32,7 @@ public:
 				function();
 			}
         });
+		t.detach();
     }
 
     void stop() noexcept

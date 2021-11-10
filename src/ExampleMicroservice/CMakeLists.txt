@@ -9,6 +9,7 @@ include_directories(../Dependencies/redis/deps)
 include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/cxx11)
 include_directories(../Dependencies/redis-plus-plus/src/sw/redis++/no_tls)
 include_directories(../Dependencies/protobuf/src)
+include_directories(../ExampleMicroservice/MicroserviceLib)
 	
 if (UNIX)
 	include_directories(/usr/local/include)
@@ -17,7 +18,7 @@ endif (UNIX)
 add_executable(ExampleMicroservice ExampleMicroservice/ExampleMicroservice.cpp)
 
 file(GLOB DataModel ../DataModel/out/cpp/*.pb.cc)
-add_library(MicroserviceLib OBJECT ${DataModel} MicroserviceLib/Microservice.cpp)
+add_library(MicroserviceLib OBJECT ${DataModel} MicroserviceLib/impl/Microservice.cpp)
 target_link_libraries(ExampleMicroservice PUBLIC MicroserviceLib)
 
 if (UNIX)
