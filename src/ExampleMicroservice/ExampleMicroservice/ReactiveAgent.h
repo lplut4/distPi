@@ -15,8 +15,18 @@ using namespace std::chrono_literals;
 
 class ReactiveAgent
 {
+private:
+
+	int 		  m_timerCount = 0;
+	IntervalTimer m_tickTimer;
+
+	MessageSubscriber<DataModel::Test::Ping> m_pingSubscriber;
+	MessageSubscriber<DataModel::Test::Pong> m_pongSubscriber;
+
 public:
 	ReactiveAgent() noexcept
+		: m_pingSubscriber( 1 )
+		, m_pongSubscriber( 1 )
 	{
 		m_pingSubscriber.onMessage([this](auto message)
 			{
@@ -57,12 +67,4 @@ public:
 	};
 
 	~ReactiveAgent() {};
-
-private:
-
-	int 		  m_timerCount = 0;
-	IntervalTimer m_tickTimer;
-
-	MessageSubscriber<DataModel::Test::Ping> m_pingSubscriber;	
-	MessageSubscriber<DataModel::Test::Pong> m_pongSubscriber;
 };

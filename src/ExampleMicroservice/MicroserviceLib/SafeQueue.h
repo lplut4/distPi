@@ -3,16 +3,20 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <typeinfo>
+
+#include "Logger.h"
 
 // A threadsafe-queue.
 template <class T>
 class SafeQueue
 {
 public:
-    SafeQueue() noexcept
+    SafeQueue( unsigned int capacity ) noexcept
         : q()
         , m()
         , c()
+		, cap( capacity )
     {}
 
     ~SafeQueue()
@@ -23,6 +27,14 @@ public:
     {
         std::lock_guard<std::mutex> lock(m);
         q.push(t);
+		
+		if (q.size() > cap)
+		{
+            auto message = "Exceeding queue capacity for " + std::string( typeid(t).name() ) + ".  Dropping messages...";
+            Logger::warning(__FILELINE__, message);
+			q.pop();
+		}
+		
         c.notify_one();
     }
 
@@ -45,4 +57,5 @@ private:
     std::queue<T>           q;
     mutable std::mutex      m;
     std::condition_variable c;
+	unsigned int            cap;
 };

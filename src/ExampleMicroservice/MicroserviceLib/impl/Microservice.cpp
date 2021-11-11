@@ -22,8 +22,8 @@
 
 namespace // private anonymous namespace
 {
-	SafeQueue<PubSubMessage> g_publishQueue;
-	SafeQueue<PubSubMessage> g_subscribeQueue;
+	SafeQueue<PubSubMessage> g_publishQueue(1000);
+	SafeQueue<PubSubMessage> g_subscribeQueue(1000);
 	std::string g_redisHost = "";
 	std::atomic<bool> g_startProcessing(false);
 	std::atomic<bool> g_continueProcessing(true);

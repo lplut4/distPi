@@ -20,10 +20,10 @@ public:
 
 	using SubscribeCallback = std::function<void(std::shared_ptr<T> msg)>;
 
-	MessageSubscriber() 
+	MessageSubscriber(unsigned int queueCapacity) 
 		: m_consumeThread(std::thread{ &MessageSubscriber::ConsumeThreadMain, this })
 		, m_enabled(true)
-		, m_messageQueue()
+		, m_messageQueue(queueCapacity)
 	{};
 
 	virtual ~MessageSubscriber() 
