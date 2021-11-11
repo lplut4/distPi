@@ -1,15 +1,13 @@
 #pragma once
 
 #include <chrono>
-#include <MicroserviceLib/MessageSubscriber.h>
 #include <MicroserviceLib/IntervalTimer.h>
-#include <MicroserviceLib/TerminalTimer.h>
-#include <MicroserviceLib/Publisher.h>
 #include <MicroserviceLib/Logger.h>
+#include <MicroserviceLib/MessageSubscriber.h>
+#include <MicroserviceLib/Publisher.h>
 
 #include "Ping.pb.h"
 #include "Pong.pb.h"
-#include "LogMessage.pb.h"
 
 using namespace std::chrono_literals;
 
