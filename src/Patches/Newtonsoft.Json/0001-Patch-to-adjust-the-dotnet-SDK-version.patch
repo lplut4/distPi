@@ -1,6 +1,6 @@
-From 49a010e3b8eababe682495e2cb2d7197dd0132ec Mon Sep 17 00:00:00 2001
+From c2bba6342c75f810e69e0bc229329984a5437b4b Mon Sep 17 00:00:00 2001
 From: Lucas Pluta <lp.whs86@gmaii.com>
-Date: Fri, 5 Nov 2021 01:31:05 -0400
+Date: Fri, 12 Nov 2021 15:20:22 -0500
 Subject: [PATCH] Patch to adjust the dotnet SDK version
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH] Patch to adjust the dotnet SDK version
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Src/global.json b/Src/global.json
-index 6d19c9f..6e34824 100644
+index 6d19c9f..a0ee6a6 100644
 --- a/Src/global.json
 +++ b/Src/global.json
 @@ -1,5 +1,5 @@
