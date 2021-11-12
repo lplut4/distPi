@@ -34,8 +34,8 @@ std::string newUUID()
 
         RpcStringFreeA(&str);
     #else
-		uuid_t uuid;
-		uuid_generate_random(uuid);
+        uuid_t uuid;
+        uuid_generate_random(uuid);
         char s[37];
         uuid_unparse(uuid, s);
     #endif

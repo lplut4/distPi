@@ -4,6 +4,6 @@ package DataModel.Utility;
 
 message TimeSpec
 {
-	uint64 tv_sec  = 1;
-	uint32 tv_nsec = 2;
+    uint64 tv_sec  = 1;
+    uint32 tv_nsec = 2;
 }

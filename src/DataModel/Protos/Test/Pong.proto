@@ -4,5 +4,5 @@ package DataModel.Test;
 
 message Pong
 {
-	uint64 count  = 1;
+    uint64 count  = 1;
 }

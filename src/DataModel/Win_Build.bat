@@ -1,8 +1,8 @@
 @echo off
 
 if "%INIT%"=="" (
-	set INIT=true
-	set PAUSE_BUILD_PROTOS=true
+    set INIT=true
+    set PAUSE_BUILD_PROTOS=true
 )
 
 title Win_Build.bat
@@ -14,7 +14,7 @@ echo #################################
 set errorBuildProtos=0
 
 if not exist "out\cpp"    ( mkdir out\cpp    || set errorBuildProtos=1 )
-if not exist "out\csharp" ( mkdir out\csharp || set errorBuildProtos=1 )	
+if not exist "out\csharp" ( mkdir out\csharp || set errorBuildProtos=1 )    
 if not exist "out\python" ( mkdir out\python || set errorBuildProtos=1 )
 
 cd Protos

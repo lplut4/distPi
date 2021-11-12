@@ -4,19 +4,19 @@ echo "# RUNNING PROTOBUF BUILD SCRIPT #"
 echo "#################################"
 
 if [ ! -d "out" ]; then
-	mkdir out
+    mkdir out
 fi
 
 cd out
 
 if [ ! -d "cpp" ]; then 
-	mkdir cpp
+    mkdir cpp
 fi
 if [ ! -d "csharp" ]; then
-	mkdir csharp
+    mkdir csharp
 fi
 if [ ! -d "python" ]; then
-	mkdir python
+    mkdir python
 fi
 
 cd ..

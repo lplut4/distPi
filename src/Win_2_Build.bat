@@ -1,9 +1,9 @@
 @echo off
 
 if "%INIT%"=="" (
-	set INIT=true
-	set PAUSE_BUILD=true
-	call Win_0_CheckEnv.bat || goto end
+    set INIT=true
+    set PAUSE_BUILD=true
+    call Win_0_CheckEnv.bat || goto end
 )
 
 title 2_Build.bat

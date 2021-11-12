@@ -6,17 +6,17 @@ import "TimeSpec.proto";
 
 message LogMessage 
 {
-	enum Category 
-	{
-		DEBUG   = 0;
-		INFO    = 1;
-		WARNING = 2;
-		ERROR   = 3;
-	}
+    enum Category 
+    {
+        DEBUG   = 0;
+        INFO    = 1;
+        WARNING = 2;
+        ERROR   = 3;
+    }
 
-	TimeSpec timeOfLog = 1;
-	Category category  = 2;
-	string   message   = 3;
-	string   file      = 4;
-	uint32   line      = 5;
+    TimeSpec timeOfLog = 1;
+    Category category  = 2;
+    string   message   = 3;
+    string   file      = 4;
+    uint32   line      = 5;
 }

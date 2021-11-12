@@ -5,9 +5,9 @@
 
 int main(int argc, char* argv[])
 {
-	// Instantiate "Agents" here
-	ReactiveAgent agent;
+    // Instantiate "Agents" here
+    ReactiveAgent agent;
 
-	// Start Communications - This should always be the last call on the main thread
-	return Microservice::start(argc, argv);
+    // Start Communications - This should always be the last call on the main thread
+    return Microservice::start(argc, argv);
 }

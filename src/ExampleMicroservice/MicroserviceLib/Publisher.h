@@ -4,6 +4,6 @@
 
 namespace Publisher
 {
-	// Publishes a message to all subscribers of this message type
-	void addToQueue(const google::protobuf::Message& message);
+    // Publishes a message to all subscribers of this message type
+    void addToQueue(const google::protobuf::Message& message);
 }
