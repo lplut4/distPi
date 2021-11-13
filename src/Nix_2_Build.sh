@@ -7,7 +7,6 @@ cd redis
 make
 cd ..
 
-
 echo Building hiredis...
 cd redis/deps/hiredis
 mkdir build
@@ -18,7 +17,6 @@ echo Running make...
 make
 cd ../../../..
 
-
 echo Building redis-plus-plus...
 cd redis-plus-plus
 mkdir build
@@ -26,11 +24,10 @@ cd build
 depDir=../..
 hiredisDir=$depDir/redis/deps/hiredis
 buildDir=$hiredis/build
-cmakeOptions="-DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DHIREDIS_HEADER=$depDir/redis/deps -DHIREDIS_LIB=$buildDir/libhiredis_static.a -DTEST_HIREDIS_LIB=$buildDir/hiredis-test -DCMAKE_PREFIX_PATH=$depDir/redis/deps/ -DREDIS_PLUS_PLUS_CXX_STANDARD=11"
+cmakeOptions="-DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DHIREDIS_HEADER=$depDir/redis/deps -DHIREDIS_LIB=$buildDir/libhiredis_static.a -DCMAKE_PREFIX_PATH=$depDir/redis/deps/ -DREDIS_PLUS_PLUS_CXX_STANDARD=11"
 cmake $cmakeOptions ..
 make
 cd ../..
-
 
 echo Building Protobuf...
 cd protobuf
