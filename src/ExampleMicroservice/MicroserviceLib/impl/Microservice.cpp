@@ -22,12 +22,13 @@
 
 namespace // private anonymous namespace
 {
+    std::string              g_redisHost("localhost");
+    int                      g_redisPort(6379);
     SafeQueue<PubSubMessage> g_publishQueue(1000);
     SafeQueue<PubSubMessage> g_subscribeQueue(1000);
-    std::string g_redisHost = "";
-    std::atomic<bool> g_startProcessing(false);
-    std::atomic<bool> g_continueProcessing(true);
-    std::mutex g_registrationMutex;
+    std::atomic<bool>        g_startProcessing(false);
+    std::atomic<bool>        g_continueProcessing(true);
+    std::mutex               g_registrationMutex;
     std::map<std::string, std::vector<IMessageSubscriber*>> g_subscribersPerChannel;
     
     std::string msgTypeToString(const sw::redis::Subscriber::MsgType& type)
@@ -45,7 +46,17 @@ namespace // private anonymous namespace
     {
         while (!g_startProcessing);
 
-        auto redis = sw::redis::Redis(g_redisHost);
+        sw::redis::ConnectionOptions connection_options;
+        connection_options.host = g_redisHost;
+        connection_options.port = g_redisPort;
+        connection_options.socket_timeout = std::chrono::milliseconds(0);
+
+        sw::redis::ConnectionPoolOptions pool_options;
+        pool_options.size = 1;
+        pool_options.wait_timeout = std::chrono::milliseconds(0);
+        pool_options.connection_lifetime = std::chrono::minutes(0);
+
+        sw::redis::Redis redis(connection_options, pool_options);
 
         while (g_continueProcessing)
         {
@@ -98,7 +109,19 @@ namespace // private anonymous namespace
 
     void runSubscriber(const std::map<std::string, std::vector<IMessageSubscriber*>>& channelSubscriptions)
     {
-        auto redis = sw::redis::Redis(g_redisHost);
+        sw::redis::ConnectionOptions connection_options;
+        connection_options.host = g_redisHost;
+        connection_options.port = g_redisPort;
+        connection_options.socket_timeout = std::chrono::milliseconds(0);
+
+        sw::redis::ConnectionPoolOptions pool_options;
+        pool_options.size = 1;
+        pool_options.wait_timeout = std::chrono::milliseconds(0);
+        pool_options.connection_lifetime = std::chrono::minutes(0);
+
+        // Connect to Redis server with a connection pool.
+        sw::redis::Redis redis(connection_options, pool_options);
+
         auto sub = redis.subscriber();
 
         std::cout << "Connected!" << std::endl;
@@ -276,7 +299,6 @@ int Microservice::start(int argc, char* argv[])
 
     char redisHost[128];
     memset(redisHost, '\0', 128);
-    strcat(redisHost, "tcp://");
 
     if (argc == 1)
     {
@@ -290,8 +312,6 @@ int Microservice::start(int argc, char* argv[])
             strcat(redisHost, argv[i]);
         }
     }
-
-    strcat(redisHost, ":6379");
 
     g_redisHost = std::string( redisHost );
 
