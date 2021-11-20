@@ -18,7 +18,7 @@ class MessageSubscriber : public IMessageSubscriber
 
 public:
 
-    using SubscribeCallback = std::function<void(std::shared_ptr<T> msg)>;
+    using SubscribeCallback = std::function<void(std::shared_ptr<const T> msg)>;
 
     MessageSubscriber(unsigned int queueCapacity) 
         : m_consumeThread(std::thread{ &MessageSubscriber::ConsumeThreadMain, this })
@@ -49,7 +49,7 @@ public:
     }
 
     // Deserialize the message, and pass it on to the subscriber
-    DeserializedMessage processSubscription(std::string encodedMsg) override
+    DeserializedMessage processSubscription(const std::string & encodedMsg) override
     {
         DeserializedMessage msg = std::make_shared<T>();
         const auto success = msg->ParseFromString(encodedMsg);
@@ -57,14 +57,14 @@ public:
         {
             Logger::error(__FILELINE__, "Could not deserialize: " + msg->GetTypeName());
         }
-        m_messageQueue.enqueue(std::dynamic_pointer_cast<T>(msg));
+        m_messageQueue.enqueue(std::dynamic_pointer_cast<const T>(msg));
         return msg;
     }
 
     // The Message has already been deserialized, but we want to pass it to a subscriber
     void processSubscription(DeserializedMessage msg) override
     {
-        m_messageQueue.enqueue(std::dynamic_pointer_cast<T>(msg));
+        m_messageQueue.enqueue(std::dynamic_pointer_cast<const T>(msg));
     }
 
 private:
@@ -78,8 +78,8 @@ private:
         }
     }
 
-    std::thread                   m_consumeThread;
-    std::atomic<bool>             m_enabled;
-    SafeQueue<std::shared_ptr<T>> m_messageQueue;
-    SubscribeCallback             m_subscribeCallback;
+    std::thread                         m_consumeThread;
+    std::atomic<bool>                   m_enabled;
+    SafeQueue<std::shared_ptr<const T>> m_messageQueue;
+    SubscribeCallback                   m_subscribeCallback;
 };

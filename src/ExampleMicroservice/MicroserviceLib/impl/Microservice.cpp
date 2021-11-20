@@ -83,9 +83,9 @@ namespace // private anonymous namespace
 
         while (g_continueProcessing)
         {
-            auto subMessage = g_subscribeQueue.dequeue();
-            auto data       = subMessage.serializedData;
-            auto name       = subMessage.fullName;
+            const auto subMessage = g_subscribeQueue.dequeue();
+            const auto data       = subMessage.serializedData;
+            const auto name       = subMessage.fullName;
 
             std::lock_guard<std::mutex> guard(g_registrationMutex);
 
