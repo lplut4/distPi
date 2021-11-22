@@ -15,6 +15,7 @@ cd Dependencies
 set depDir=%cd%
 
 set gitConfig=-c advice.detachedHead=false --depth 1 --single-branch
+set patchConfig=--reject --whitespace=fix
 
 if not exist "redis" (
     echo Pulling redis...
@@ -30,7 +31,7 @@ if not exist "microsoftarchive" (
     cd microsoftarchive
     git clone %gitConfig% -b win-3.0.504 https://github.com/microsoftarchive/redis.git || set error=1
     cd redis
-    git apply ..\..\..\Patches\microsoftarchive\redis\0001-Patch-to-allow-builds-in-VS2019.patch
+    git apply %patchConfig% ..\..\..\Patches\microsoftarchive\redis\0001-Patch-to-allow-builds-in-VS2019.patch
 ) else (
     echo Redis for Windows already exists
 )
@@ -48,7 +49,7 @@ if not exist "StackExchange.Redis" (
     echo Pulling StackExchange.Redis...
     git clone %gitConfig% -b 2.2.79 https://github.com/StackExchange/StackExchange.Redis.git || set error=1
     cd StackExchange.Redis
-    git apply ..\..\Patches\StackExchange.Redis\0001-Patch-to-remove-github-hooks.patch
+    git apply %patchConfig% ..\..\Patches\StackExchange.Redis\0001-Patch-to-remove-github-hooks.patch
 ) else (
     echo StackExchange.Redis already exists
 )
@@ -58,7 +59,7 @@ if not exist "Newtonsoft.Json" (
     echo Pulling Newtonsoft.Json...
     git clone %gitConfig% -b 13.0.1 https://github.com/JamesNK/Newtonsoft.Json.git || set error=1
     cd Newtonsoft.Json
-    git apply ..\..\Patches\Newtonsoft.Json\0001-Patch-to-adjust-the-dotnet-SDK-version.patch
+    git apply %patchConfig% ..\..\Patches\Newtonsoft.Json\0001-Patch-to-adjust-the-dotnet-SDK-version.patch
 ) else (
     echo Newtonsoft.Json already exists
 )
