@@ -22,10 +22,20 @@
 
 namespace // private anonymous namespace
 {
+    const int arenaBlockSize = 1024 * 128;
+    char arenaBlock1[arenaBlockSize];
+    char arenaBlock2[arenaBlockSize];
+
+    google::protobuf::Arena  g_arena1(arenaBlock1, arenaBlockSize);
+    google::protobuf::Arena  g_arena2(arenaBlock2, arenaBlockSize);
+    std::atomic<int>         g_ArenaIndex = 1;
+    google::protobuf::Arena* g_currentArena = &g_arena1;
+    std::mutex               g_arenaMutex;
+
     std::string              g_redisHost("localhost");
     int                      g_redisPort(6379);
-    SafeQueue<PubSubMessage> g_publishQueue(1000);
-    SafeQueue<PubSubMessage> g_subscribeQueue(1000);
+    SafeQueue<PubMessage>    g_publishQueue(1000);
+    SafeQueue<SubMessage>    g_subscribeQueue(1000);
     std::atomic<bool>        g_startProcessing(false);
     std::atomic<bool>        g_continueProcessing(true);
     std::mutex               g_registrationMutex;
@@ -58,23 +68,46 @@ namespace // private anonymous namespace
 
         sw::redis::Redis redis(connection_options, pool_options);
 
+        int count = 0;
+        std::string name;
+        std::string serializedData;
         while (g_continueProcessing)
         {
-            auto pubMessage = g_publishQueue.dequeue();
+            const auto pubMessage = g_publishQueue.dequeue();
+            name = pubMessage.message->GetDescriptor()->full_name();
+            serializedData = pubMessage.message->SerializeAsString();
             try
             {
-                redis.publish(pubMessage.fullName, pubMessage.serializedData);
+                redis.publish(name, serializedData);
             }
             catch (const sw::redis::Error&)
             {
-                std::cout << "Dropping message: " << pubMessage.fullName << std::endl;
+                std::cout << "Dropping message: " << name << std::endl;
+            }
+            if (count++ % 100 == 0)
+            {
+                std::lock_guard<std::mutex> guard(g_arenaMutex);
+                if (g_ArenaIndex == 1)
+                {
+                    g_arena2.Reset();
+                    g_ArenaIndex = 2;
+                    g_currentArena = &g_arena2;
+                }
+                else
+                {
+                    g_arena1.Reset();
+                    g_ArenaIndex = 1;
+                    g_currentArena = &g_arena1;
+                }
+                std::string message("Allocated: %llu   used: %llu\n", g_currentArena->SpaceAllocated(), g_currentArena->SpaceUsed());
+                Logger::debug(__FILELINE__, message);
             }
         }
     }
     
     void queueUpSubscribe(const std::string& channel, const std::string& msg)
     {
-        g_subscribeQueue.enqueue(PubSubMessage(channel, msg));
+        g_subscribeQueue.enqueue(SubMessage(channel, msg));
     }
     
     void ProcessSubscribeQueueTask()
@@ -250,7 +283,8 @@ void Logger::info(const char* file, const int line, const std::string& message)
 
 void Publisher::addToQueue(const google::protobuf::Message& message)
 {
-    g_publishQueue.enqueue(PubSubMessage(message));
+    std::lock_guard<std::mutex> guard(g_arenaMutex);
+    g_publishQueue.enqueue(PubMessage(message, g_currentArena));
 }
 
 bool Subscriber::registerSubscriber(const std::string& channel, IMessageSubscriber* sub)
